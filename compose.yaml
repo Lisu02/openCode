@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=openCodeDB'
+      - 'POSTGRES_PASSWORD=user'
+      - 'POSTGRES_USER=user'
+    ports:
+      - '5432'
+  adminer:
+    image: adminer
+    container_name: openCode-adminer
+    restart: always
+    ports:
+      - "2080:8080"
+  gccCompiler:
+    image: gcc:14.2.0
+    container_name: openCode-GccCompiler
+    tty: true
+    init: false
