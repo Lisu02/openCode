@@ -1,10 +1,7 @@
 package com.example.openCode.CompilationModule.Controller;
 
 import com.example.openCode.CompilationModule.Model.UserCode;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.logging.Logger;
 
@@ -12,10 +9,19 @@ import java.util.logging.Logger;
 @CrossOrigin(origins = "*")
 public class CompileController {
 
+    String code = "test";
+
+
+
+    @GetMapping("/compile")
+    public String getCompile(){
+        System.out.println("getCompile");
+        return code;
+    }
 
     @PostMapping("/compile")
-    public String post(@RequestBody String code) {
-
+    public String postCompile(@RequestBody String code) {
+        this.code = code;
         UserCode userCode = new UserCode(0L,"Java",code);
         System.out.println(userCode);
         Logger logger = Logger.getAnonymousLogger();

@@ -11,4 +11,5 @@ public class CodeInputController {
     public String input() {
         return "input.html";
     }
+
 }
