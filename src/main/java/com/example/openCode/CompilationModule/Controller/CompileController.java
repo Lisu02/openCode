@@ -1,6 +1,9 @@
 package com.example.openCode.CompilationModule.Controller;
 
 import com.example.openCode.CompilationModule.Model.UserCode;
+import com.example.openCode.CompilationModule.Service.CompilationService;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.logging.Logger;
@@ -9,24 +12,20 @@ import java.util.logging.Logger;
 @CrossOrigin(origins = "*")
 public class CompileController {
 
-    String code = "test";
 
+    private CompilationService compilationService;
 
-
-    @GetMapping("/compile")
-    public String getCompile(){
-        System.out.println("getCompile");
-        return code;
+    @Autowired
+    public CompileController(CompilationService compilationService) {
+        this.compilationService = compilationService;
     }
 
+
+    //TODO: FIX configuration in spring security 403 error
     @PostMapping("/compile")
     public String postCompile(@RequestBody String code) {
-        this.code = code;
-        UserCode userCode = new UserCode(0L,"Java",code);
-        System.out.println(userCode);
-        Logger logger = Logger.getAnonymousLogger();
-        logger.info(userCode.getUserCode());
-        //TODO: Return JSON with result code and compilation/test status
-        return userCode.toString();
+        UserCode userCode = new UserCode(0L,"C",code);
+        System.out.println(code);
+        return compilationService.compileUserCode(userCode);
     }
 }
