@@ -31,9 +31,10 @@ public class CompilationService {
     }
     private String compileUserCodeC(UserCode userCode){
         //TODO: Implementacja prototypu kompilatora GCC
-        dockerCompilatorGCC.compile(userCode.getUserCode());
-        return dockerCompilatorGCC.runCode();
-        //return "fun";
+        String compileOutput = "";
+        compileOutput += dockerCompilatorGCC.compile(userCode.getUserCode());
+        compileOutput += dockerCompilatorGCC.runCode();
+        return compileOutput;
     }
 
 
