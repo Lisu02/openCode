@@ -25,7 +25,7 @@ public class CompileController {
     @PostMapping("/compile")
     public String postCompile(@RequestBody String code) {
         UserCode userCode = new UserCode(0L,"C",code);
-        System.out.println(code);
+        //System.out.println(code);
         return compilationService.compileUserCode(userCode);
     }
 }

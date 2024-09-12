@@ -33,7 +33,11 @@ public class CompilationService {
         //TODO: Implementacja prototypu kompilatora GCC
         String compileOutput = "";
         compileOutput += dockerCompilatorGCC.compile(userCode.getUserCode());
-        compileOutput += dockerCompilatorGCC.runCode();
+        if (compileOutput.isEmpty()){
+            compileOutput += dockerCompilatorGCC.runCode();
+        }else{
+            compileOutput += "COMPILATION ERROR:";
+        }
         return compileOutput;
     }
 

@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 @Component
 public class DockerCompilatorGCC {
 
@@ -32,10 +34,7 @@ public class DockerCompilatorGCC {
             log.atInfo().log("GCC Container is running no need for starting");
         }
 
-
-
-        System.out.println("In compile method starting container");
-        System.out.println(dockerClient.listContainersCmd().exec());
+        //System.out.println(dockerClient.listContainersCmd().exec());
         ExecCreateCmdResponse execCompileUserCode = dockerClient.execCreateCmd(gccContainerId)
                 .withAttachStdout(true)
                 .withAttachStdin(true)
@@ -49,7 +48,7 @@ public class DockerCompilatorGCC {
             e.printStackTrace();
             log.atError().log("COMPILATION FAILED!");
         }
-
+        log.atInfo().log("Compilation output -> "+callbackCompile.getOutput());
        // dockerClient.stopContainerCmd(gccContainerId).exec();
         return callbackCompile.getOutput();
     }
@@ -72,16 +71,10 @@ public class DockerCompilatorGCC {
         MyResultCallback callbackRun = new MyResultCallback();
 
         dockerClient.execStartCmd(execRun.getId()).exec(callbackRun);
-        callbackRun.awaitCompletion();
+        //TODO:Ustawic timeouty dla zadan
+        callbackRun.awaitCompletion(1500, TimeUnit.MILLISECONDS);
         String output = callbackRun.getOutput();
-        System.out.println("Output ->" + output);
-        //dockerClient.stopContainerCmd(gccContainerId).exec();
-//        try {
-//            dockerClient.close();
-//        }catch (Exception e){
-//            System.out.println("DockerCloseError");
-//            e.printStackTrace();
-//        }
+        log.atInfo().log("Runnable output -> \n" + output);
 
         return output;
     }
@@ -92,7 +85,8 @@ public class DockerCompilatorGCC {
             output = runCode("hello");
         } catch (InterruptedException e){
             e.printStackTrace();
-            output = "ERROR";
+            dockerClient.stopContainerCmd(gccContainerId);
+            output = "ERROR possibly timeout";
         }
         return output;
     }
