@@ -91,8 +91,8 @@ public class DockerCompilatorGCC {
                 .withCmd("rm", "/tmp/"+catalogName,"&&" ,"rm","/tmp/"+catalogName+".c")
                 .exec();
         MyResultCallback callbackDelete = new MyResultCallback();
-       // dockerClient.execStartCmd(execDelete.getId()).exec(callbackDelete);
-       // callbackDelete.awaitCompletion(100,TimeUnit.MILLISECONDS);
+        dockerClient.execStartCmd(execDelete.getId()).exec(callbackDelete);
+        callbackDelete.awaitCompletion(100,TimeUnit.MILLISECONDS);
         return output;
     }
     //Overloaded method
