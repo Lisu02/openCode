@@ -9,6 +9,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonSerialize
 public class UserCode {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
