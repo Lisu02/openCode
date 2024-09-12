@@ -31,7 +31,7 @@ public class DockerCompilatorGCC {
         String sourceCode = userCode.getUserCode();
         String catalogName = userCode.getId().toString();
 
-        String compileComand = "gcc -o /tmp/"+catalogName +" /tmp/"+catalogName+".c 2>&1 >/tmp/compile_output.txt";
+        String compileComand = "gcc -o /tmp/"+catalogName +" /tmp/"+catalogName+".c";
 
 
         if(!isContainerRunning()){
@@ -45,6 +45,7 @@ public class DockerCompilatorGCC {
         ExecCreateCmdResponse execCompileUserCode = dockerClient.execCreateCmd(gccContainerId)
                 .withAttachStdout(true)
                 .withAttachStdin(true)
+                .withAttachStderr(true)
                 .withCmd("sh", "-c", "echo \"" + sourceCode + "\" > /tmp/"+ catalogName + ".c && " + compileComand)
                 .exec();
         MyResultCallback callbackCompile = new MyResultCallback();
@@ -55,6 +56,7 @@ public class DockerCompilatorGCC {
             e.printStackTrace();
             log.atError().log("COMPILATION FAILED!");
         }
+
         log.atInfo().log("Compilation output -> "+callbackCompile.getOutput());
        // dockerClient.stopContainerCmd(gccContainerId).exec();
         return callbackCompile.getOutput();
@@ -91,8 +93,8 @@ public class DockerCompilatorGCC {
                 .withCmd("rm", "/tmp/"+catalogName,"&&" ,"rm","/tmp/"+catalogName+".c")
                 .exec();
         MyResultCallback callbackDelete = new MyResultCallback();
-        dockerClient.execStartCmd(execDelete.getId()).exec(callbackDelete);
-        callbackDelete.awaitCompletion(100,TimeUnit.MILLISECONDS);
+        //dockerClient.execStartCmd(execDelete.getId()).exec(callbackDelete);
+        //callbackDelete.awaitCompletion(100,TimeUnit.MILLISECONDS);
         return output;
     }
     //Overloaded method
