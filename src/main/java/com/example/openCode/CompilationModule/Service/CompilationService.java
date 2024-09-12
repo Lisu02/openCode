@@ -29,12 +29,13 @@ public class CompilationService {
         //TODO: Java w przyszlosci
         return "NO JAVA IMPLEMENTATION YET";
     }
+
     private String compileUserCodeC(UserCode userCode){
         //TODO: Implementacja prototypu kompilatora GCC
         String compileOutput = "";
-        compileOutput += dockerCompilatorGCC.compile(userCode.getUserCode());
+        compileOutput += dockerCompilatorGCC.compile(userCode);
         if (compileOutput.isEmpty()){
-            compileOutput += dockerCompilatorGCC.runCode();
+            compileOutput += dockerCompilatorGCC.runCode(userCode);
         }else{
             compileOutput += "COMPILATION ERROR:";
         }

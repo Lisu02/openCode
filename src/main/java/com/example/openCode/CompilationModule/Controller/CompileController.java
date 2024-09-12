@@ -14,6 +14,7 @@ public class CompileController {
 
 
     private CompilationService compilationService;
+    private long codeID = 0;
 
     @Autowired
     public CompileController(CompilationService compilationService) {
@@ -24,7 +25,8 @@ public class CompileController {
     //TODO: FIX configuration in spring security 403 error
     @PostMapping("/compile")
     public String postCompile(@RequestBody String code) {
-        UserCode userCode = new UserCode(0L,"C",code);
+        UserCode userCode = new UserCode(codeID,"C",code);
+        codeID++;
         //System.out.println(code);
         return compilationService.compileUserCode(userCode);
     }
