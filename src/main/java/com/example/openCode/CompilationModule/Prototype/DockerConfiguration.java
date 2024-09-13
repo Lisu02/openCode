@@ -25,14 +25,14 @@ public class DockerConfiguration {
 
     static final private DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient);
 
-    public static DockerClient getDockerClientInstance(){
+    public static DockerClient getDockerClientInstance() {
         return dockerClient;
     }
 
-    public static void printDockerContainerList(){
+    public static void printDockerContainerList() {
 
         System.out.println("--------Start of List--------");
-        for (Container container: dockerClient.listContainersCmd().exec()){
+        for (Container container : dockerClient.listContainersCmd().exec()) {
             System.out.println("Id: " + container.getId() + " | image: " + container.getImage() + " status: " + container.getStatus());
         }
         System.out.println("--------End of List--------");

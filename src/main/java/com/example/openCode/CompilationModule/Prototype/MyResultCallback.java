@@ -14,7 +14,7 @@ public class MyResultCallback extends ExecStartResultCallback {
         super.onNext(item);
     }
 
-    public String getOutput(){
+    public String getOutput() {
         return logBuilder.toString();
     }
 

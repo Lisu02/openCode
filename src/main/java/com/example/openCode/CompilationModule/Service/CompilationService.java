@@ -14,7 +14,7 @@ public class CompilationService {
         this.dockerCompilatorGCC = dockerCompilatorGCC;
     }
 
-    public String compileUserCode(UserCode userCode){
+    public String compileUserCode(UserCode userCode) {
 
         String compilationOutput = switch (userCode.getProgrammingLanguage()) {
             case "JAVA" -> compileUserCodeJava(userCode);
@@ -25,18 +25,18 @@ public class CompilationService {
         return compilationOutput;
     }
 
-    private String compileUserCodeJava(UserCode userCode){
+    private String compileUserCodeJava(UserCode userCode) {
         //TODO: Java w przyszlosci
         return "NO JAVA IMPLEMENTATION YET";
     }
 
-    private String compileUserCodeC(UserCode userCode){
+    private String compileUserCodeC(UserCode userCode) {
         //TODO: Implementacja prototypu kompilatora GCC
         String compileOutput = "";
         compileOutput += dockerCompilatorGCC.compile(userCode);
-        if (compileOutput.isEmpty()){
+        if (compileOutput.isEmpty()) {
             compileOutput += dockerCompilatorGCC.runCode(userCode);
-        }else{
+        } else {
             compileOutput += "COMPILATION ERROR:";
         }
         return compileOutput;

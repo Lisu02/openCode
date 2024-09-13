@@ -21,23 +21,23 @@ public class DockerCompilatorGCC {
 
     //private String compileComand = "gcc -o /tmp/hello /tmp/hello.c 2>&1 >/tmp/compile_output.txt";
 
-    private boolean isContainerRunning(){
-        InspectContainerResponse inspectResponse =  dockerClient.inspectContainerCmd(gccContainerId).exec();
+    private boolean isContainerRunning() {
+        InspectContainerResponse inspectResponse = dockerClient.inspectContainerCmd(gccContainerId).exec();
         return Boolean.TRUE.equals(inspectResponse.getState().getRunning());
     }
 
-    public String compile(UserCode userCode){
+    public String compile(UserCode userCode) {
 
         String sourceCode = userCode.getUserCode();
         String catalogName = userCode.getId().toString();
 
-        String compileComand = "gcc -o /tmp/"+catalogName +" /tmp/"+catalogName+".c";
+        String compileComand = "gcc -o /tmp/" + catalogName + " /tmp/" + catalogName + ".c";
 
 
-        if(!isContainerRunning()){
+        if (!isContainerRunning()) {
             dockerClient.startContainerCmd(gccContainerId).exec();
             //log.atInfo().log("Starting a GCC container: " + gccContainerId);
-        }else{
+        } else {
             //log.atInfo().log("GCC Container is running no need for starting");
         }
 
@@ -46,19 +46,19 @@ public class DockerCompilatorGCC {
                 .withAttachStdout(true)
                 .withAttachStdin(true)
                 .withAttachStderr(true)
-                .withCmd("sh", "-c", "echo \"" + sourceCode + "\" > /tmp/"+ catalogName + ".c && " + compileComand)
+                .withCmd("sh", "-c", "echo \"" + sourceCode + "\" > /tmp/" + catalogName + ".c && " + compileComand)
                 .exec();
         MyResultCallback callbackCompile = new MyResultCallback();
         dockerClient.execStartCmd(execCompileUserCode.getId()).exec(callbackCompile);
-        try{
+        try {
             callbackCompile.awaitCompletion();
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
             log.atError().log("COMPILATION FAILED!");
         }
 
-        log.atInfo().log("Compilation output -> "+callbackCompile.getOutput());
-       // dockerClient.stopContainerCmd(gccContainerId).exec();
+        log.atInfo().log("Compilation output -> " + callbackCompile.getOutput());
+        // dockerClient.stopContainerCmd(gccContainerId).exec();
         return callbackCompile.getOutput();
     }
 
@@ -66,17 +66,17 @@ public class DockerCompilatorGCC {
     //TODO: add catalogName for userCode recognition
     public String runCode(String catalogName) throws InterruptedException {
 
-        if(!isContainerRunning()){
+        if (!isContainerRunning()) {
             dockerClient.startContainerCmd(gccContainerId).exec();
             //log.atInfo().log("Starting a GCC container: " + gccContainerId);
-        }else{
+        } else {
             //log.atInfo().log("GCC Container is running no need for starting");
         }
 
         ExecCreateCmdResponse execRun = dockerClient.execCreateCmd(gccContainerId)
                 .withAttachStdin(true)
                 .withAttachStdout(true)
-                .withCmd("/tmp/./"+ catalogName)
+                .withCmd("/tmp/./" + catalogName)
                 .exec();
 
         MyResultCallback callbackRun = new MyResultCallback();
@@ -90,26 +90,26 @@ public class DockerCompilatorGCC {
         ExecCreateCmdResponse execDelete = dockerClient.execCreateCmd(gccContainerId)
                 .withAttachStdin(true)
                 .withAttachStdout(true)
-                .withCmd("rm", "/tmp/"+catalogName,"&&" ,"rm","/tmp/"+catalogName+".c")
+                .withCmd("rm", "/tmp/" + catalogName, "&&", "rm", "/tmp/" + catalogName + ".c")
                 .exec();
         MyResultCallback callbackDelete = new MyResultCallback();
         //dockerClient.execStartCmd(execDelete.getId()).exec(callbackDelete);
         //callbackDelete.awaitCompletion(100,TimeUnit.MILLISECONDS);
         return output;
     }
+
     //Overloaded method
-    public String runCode(UserCode userCode)  {
+    public String runCode(UserCode userCode) {
         String output = "empty";
-        try{
+        try {
             output = runCode(userCode.getId().toString());
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
             dockerClient.stopContainerCmd(gccContainerId);
             output = "ERROR possibly timeout";
         }
         return output;
     }
-
 
 
 }
