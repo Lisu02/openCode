@@ -2,7 +2,7 @@ package com.example.openCode.CompilationModule.Service;
 
 import com.example.openCode.CompilationModule.Model.UserCode;
 //import com.example.openCode.CompilationModule.Prototype.DockerCompilatorGCC;
-import com.example.openCode.CompilationModule.Prototype.DockerCompilatorGCC;
+import com.example.openCode.CompilationModule.Service.Prototype.DockerCompilatorGCC;
 import org.springframework.stereotype.Service;
 
 @Service

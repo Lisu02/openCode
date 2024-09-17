@@ -1,4 +1,4 @@
-package com.example.openCode.CompilationModule.Prototype;
+package com.example.openCode.CompilationModule.Service.Prototype;
 
 import lombok.Getter;
 

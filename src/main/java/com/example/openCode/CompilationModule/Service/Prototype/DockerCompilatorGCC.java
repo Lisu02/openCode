@@ -1,4 +1,4 @@
-package com.example.openCode.CompilationModule.Prototype;
+package com.example.openCode.CompilationModule.Service.Prototype;
 
 import com.example.openCode.CompilationModule.Model.UserCode;
 import com.github.dockerjava.api.DockerClient;
@@ -6,7 +6,6 @@ import com.github.dockerjava.api.command.ExecCreateCmdResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
