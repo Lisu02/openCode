@@ -12,6 +12,7 @@ import java.util.List;
 @Table(name = "Task")
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Task {
 
     @Id

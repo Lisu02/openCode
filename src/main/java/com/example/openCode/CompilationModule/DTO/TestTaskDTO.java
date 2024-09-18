@@ -9,6 +9,6 @@ public class TestTaskDTO {
 
     private Long id;
     private Long taskId;
-    private List<TestArgumentsDTO> testArgumentsDTOList;
+    private List<TestInputArgumentDTO> testInputArgumentDTOList;
     private String expectedValue;
 }

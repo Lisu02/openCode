@@ -1,10 +1,9 @@
 package com.example.openCode.CompilationModule.DTO;
 
-import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 @Data
-public class TestArgumentsDTO {
+public class TestInputArgumentDTO {
 
     private Long id;
     private String type;
