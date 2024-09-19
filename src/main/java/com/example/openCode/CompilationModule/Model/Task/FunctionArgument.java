@@ -1,17 +1,16 @@
-package com.example.openCode.CompilationModule.Model;
+package com.example.openCode.CompilationModule.Model.Task;
 
 
+import com.example.openCode.CompilationModule.Model.ReturnType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class FunctionArgument {
 
     @Id

@@ -1,5 +1,6 @@
-package com.example.openCode.CompilationModule.Model;
+package com.example.openCode.CompilationModule.Model.TestTask;
 
+import com.example.openCode.CompilationModule.Model.ReturnType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

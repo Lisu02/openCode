@@ -1,9 +1,10 @@
-package com.example.openCode.CompilationModule.Model;
+package com.example.openCode.CompilationModule.Model.Task;
 
+import com.example.openCode.CompilationModule.Model.ReturnType;
+import com.example.openCode.CompilationModule.Model.TestTask.TestTask;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter

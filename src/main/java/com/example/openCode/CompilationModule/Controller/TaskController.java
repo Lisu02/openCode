@@ -1,11 +1,8 @@
 package com.example.openCode.CompilationModule.Controller;
 
 import com.example.openCode.CompilationModule.DTO.TaskDTO;
-import com.example.openCode.CompilationModule.Model.Task;
-import com.example.openCode.CompilationModule.Repository.TaskRepository;
 import com.example.openCode.CompilationModule.Service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,11 +24,12 @@ public class TaskController {
     public List<TaskDTO> getAllTasks(){
         //TODO: getAll tasks using DTO
         taskService.getAllTasks();
-        return ;
+
+        return null;
     }
 
     @PostMapping("/v1/task")
     public void putTask(@RequestBody TaskDTO taskDTO){
-        taskService.saveTask(taskDTO);
+        taskService.saveTaskDTO(taskDTO);
     }
 }

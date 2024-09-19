@@ -1,6 +1,6 @@
 package com.example.openCode.CompilationModule.Repository;
 
-import com.example.openCode.CompilationModule.Model.TestTask;
+import com.example.openCode.CompilationModule.Model.TestTask.TestTask;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
