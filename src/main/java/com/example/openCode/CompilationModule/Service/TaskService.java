@@ -7,33 +7,50 @@ import com.example.openCode.CompilationModule.DTO.TestTaskDTO;
 import com.example.openCode.CompilationModule.Model.*;
 import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.Task;
-import com.example.openCode.CompilationModule.Model.TestTask.TestArguments;
+import com.example.openCode.CompilationModule.Model.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.TestTask.TestTask;
+import com.example.openCode.CompilationModule.Repository.FunctionArgumentRepository;
 import com.example.openCode.CompilationModule.Repository.TaskRepository;
+import com.example.openCode.CompilationModule.Repository.TestArgumentRepository;
+import com.example.openCode.CompilationModule.Repository.TestTaskRepository;
 import com.example.openCode.CompilationModule.Service.Exception.TaskNotFoundException;
+import org.glassfish.hk2.utilities.reflection.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
 
     TaskRepository taskRepository;
+    FunctionArgumentRepository functionArgumentRepository;
+    TestTaskRepository testTaskRepository;
+    TestArgumentRepository testArgumentRepository;
+
 
     @Autowired
-    public TaskService(TaskRepository taskRepository){
+    public TaskService(TaskRepository taskRepository,
+                       FunctionArgumentRepository functionArgumentRepository,
+                       TestTaskRepository testTaskRepository,
+                       TestArgumentRepository testArgumentRepository
+    ){
         this.taskRepository = taskRepository;
+        this.functionArgumentRepository = functionArgumentRepository;
+        this.testTaskRepository = testTaskRepository;
+        this.testArgumentRepository = testArgumentRepository;
     }
+
+    //-------------GETTING TASKS-------------
 
     public List<TaskDTO> getTaskDTOList(){
         List<Task> taskList = taskRepository.findAll();
         return mapTaskListToTaskDTOList(taskList);
     }
 
-    public void saveTaskDTO(TaskDTO taskDTO){
-        taskRepository.save(mapTaskDTOtoTask(taskDTO));
-    }
 
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
@@ -44,10 +61,58 @@ public class TaskService {
         return mapTaskListToTaskDTOList(taskList);
     }
 
-    public void saveTask(Task task){
-        taskRepository.save(task);
+    public TaskDTO getTaskDTObyId(long id){
+        Optional<Task> taskDTO = taskRepository.findById(id);
+        if(taskDTO.isEmpty()) return null;
+        return mapTaskToDTO(taskDTO.get());
     }
 
+    //-----------SAVING TASK---------------
+
+    public void saveTaskDTO(TaskDTO taskDTO){
+        saveTask(mapTaskDTOtoTask(taskDTO));
+    }
+
+    public void saveTask(Task task){
+        taskRepository.save(task);
+        saveFunctionArgument(task.getArgumentList());
+        saveTestTask(task.getTestList());
+    }
+
+    public void saveFunctionArgument(FunctionArgument functionArgument){
+        functionArgumentRepository.save(functionArgument);
+    }
+    public void saveFunctionArgument(List<FunctionArgument> functionArgumentList){
+        functionArgumentRepository.saveAll(functionArgumentList);
+    }
+
+    public void saveTestTask(TestTask testTask){
+        if(testTask != null){
+            testTaskRepository.save(testTask);
+            if(testTask.getTestArguments() != null && !testTask.getTestArguments().isEmpty()){
+                saveTestArgument(testTask.getTestArguments());
+            }
+        }
+    }
+    public void saveTestTask(List<TestTask> testTaskList){
+        if(testTaskList != null && !testTaskList.isEmpty()){
+            testTaskRepository.saveAll(testTaskList);
+            for (TestTask testTask : testTaskList) {
+                saveTestArgument(testTask.getTestArguments());  //Zapisywanie wszystkich argumentów w TestTask
+            }
+        }
+    }
+
+    public void saveTestArgument(TestArgument testArgument){
+        if(testArgument != null){
+            testArgumentRepository.save(testArgument);
+        }
+    }
+    public void saveTestArgument(List<TestArgument> testArgumentList){
+        if(testArgumentList != null && !testArgumentList.isEmpty()){
+            testArgumentRepository.saveAll(testArgumentList);
+        }
+    }
 
     //-------------------- MAPPING METHODS --------------------
 
@@ -72,15 +137,14 @@ public class TaskService {
         return Task.builder()
                 .returnType(ReturnType.valueOf(taskDTO.getReturnType().toUpperCase()))
                 .functionName(taskDTO.getFunctionName())
-                .argumentList(mapFunctionArgumentListToDTO(taskDTO.getArgumentList()))
-                .testList(taskDTO.getTestList())
+                .argumentList(mapFunctionArgumentDTOListToObject(taskDTO.getArgumentList()))
+                .testList(mapTestTaskDTOListToObject(taskDTO.getTestList()))
                 .build();
     }
 
     public List<TaskDTO> mapTaskListToTaskDTOList(List<Task> taskList){
         return taskList.stream().map(this::mapTaskToDTO).toList();
     }
-
 
     //FunctionArgument
     public FunctionArgumentDTO mapFunctionArgumentToDTO(FunctionArgument functionArgument){
@@ -115,6 +179,12 @@ public class TaskService {
         return null;
     }
 
+    public List<FunctionArgument> mapFunctionArgumentDTOListToObject(List<FunctionArgumentDTO> functionArgumentDTOList){
+        return functionArgumentDTOList.stream()
+                .map(this::mapFunctionArgumentDTOtoObject)
+                .collect(Collectors.toList());
+    }
+
 
     //TestTask
     public TestTaskDTO mapTestTaskToDTO(TestTask testTask){
@@ -124,20 +194,56 @@ public class TaskService {
                 .build();
     }
 
+    public TestTask mapTestTaskDTOtoObject(TestTaskDTO testTaskDTO){
+
+        Optional<Task> task = taskRepository.findById(testTaskDTO.getTaskId());
+        if(task.isEmpty()){
+            return null;
+        }
+        return TestTask.builder()
+                .testArguments(mapTestInputArgumentDTOListToObject(testTaskDTO.getTestInputArgumentDTOList()))
+                .expectedValue(testTaskDTO.getExpectedValue())
+                .task(task.get())
+                .build();
+    }
+
     public List<TestTaskDTO> mapTestTaskListToDTO(List<TestTask> testTaskList){
         return testTaskList.stream().map(this::mapTestTaskToDTO).toList();
     }
 
-
-    //TestInputArgument (TestArguments) todo:rename arguments
-    public List<TestInputArgumentDTO> mapTestInputArgumentListToDTO(List<TestArguments> testArgumentsList){
-        return testArgumentsList.stream().map(this::mapTestInputArgumentToDTO).toList();
+    public List<TestTask> mapTestTaskDTOListToObject(List<TestTaskDTO> testListDTO) {
+        return testListDTO.stream().map(this::mapTestTaskDTOtoObject).collect(Collectors.toList());
     }
 
-    public TestInputArgumentDTO mapTestInputArgumentToDTO(TestArguments testArguments){
+
+    //TestInputArgument (TestArguments) todo:rename arguments
+    public TestInputArgumentDTO mapTestInputArgumentToDTO(TestArgument testArgument){
         return TestInputArgumentDTO.builder()
-                .type(testArguments.getType().toString())
-                .testArgument(testArguments.getTestArgument())
+                .type(testArgument.getType().toString())
+                .testArgument(testArgument.getArgument())
                 .build();
+    }
+
+    public TestArgument mapTestInputArgumentDTOtoObject(TestInputArgumentDTO testInputArgumentDTO){
+        Optional<TestTask> testTask = testTaskRepository.findById(testInputArgumentDTO.getTestTaskId());
+        if(testTask.isEmpty()){
+            return null;
+        }
+
+        return TestArgument.builder()
+                .type(ReturnType.valueOf(testInputArgumentDTO.getType().toUpperCase()))
+                .argument(testInputArgumentDTO.getTestArgument())
+                .testTask(testTask.get())
+                .build();
+    }
+
+    public List<TestInputArgumentDTO> mapTestInputArgumentListToDTO(List<TestArgument> testArgumentList){
+        return testArgumentList.stream().map(this::mapTestInputArgumentToDTO).toList();
+    }
+
+    private List<TestArgument> mapTestInputArgumentDTOListToObject(List<TestInputArgumentDTO> testInputArgumentDTOList) {
+        return testInputArgumentDTOList.stream()
+                .map(this::mapTestInputArgumentDTOtoObject)
+                .collect(Collectors.toList());
     }
 }

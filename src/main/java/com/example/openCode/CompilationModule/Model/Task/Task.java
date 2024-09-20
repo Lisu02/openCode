@@ -21,6 +21,7 @@ public class Task {
     private long id;
 
     @Column(name = "returnType")
+    @Enumerated(EnumType.STRING)
     private ReturnType returnType;
 
     @Column(name = "funtionName")
@@ -31,5 +32,4 @@ public class Task {
 
     @OneToMany(mappedBy = "task")
     private List<TestTask> testList;
-
 }

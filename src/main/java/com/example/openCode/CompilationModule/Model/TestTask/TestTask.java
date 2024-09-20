@@ -16,15 +16,13 @@ public class TestTask {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private long id;
 
     @ManyToOne
     private Task task;
 
     @OneToMany(mappedBy = "testTask")
-    private List<TestArguments> testArguments;
+    private List<TestArgument> testArguments;
 
     private String expectedValue;
-
-
 }

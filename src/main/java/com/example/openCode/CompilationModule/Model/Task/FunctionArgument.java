@@ -18,6 +18,7 @@ public class FunctionArgument {
     private long id;
 
     @Column(name = "type")
+    @Enumerated(EnumType.STRING)
     private ReturnType type;
 
     @Column(name = "name")

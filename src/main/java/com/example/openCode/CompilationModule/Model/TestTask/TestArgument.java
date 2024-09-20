@@ -2,28 +2,26 @@ package com.example.openCode.CompilationModule.Model.TestTask;
 
 import com.example.openCode.CompilationModule.Model.ReturnType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
 @Getter
-public class TestArguments {
-
+@Builder
+public class TestArgument {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private long id;
 
     @Column(name = "type")
-    private ReturnType type;
+    @Enumerated(EnumType.STRING)
+    private ReturnType type;  //todo: Probably will be removed soon
 
     @Column(name = "testArgument")
-    private String testArgument;
+    private String argument;
 
     @ManyToOne
     private TestTask testTask;
