@@ -14,11 +14,9 @@ import com.example.openCode.CompilationModule.Repository.TaskRepository;
 import com.example.openCode.CompilationModule.Repository.TestArgumentRepository;
 import com.example.openCode.CompilationModule.Repository.TestTaskRepository;
 import com.example.openCode.CompilationModule.Service.Exception.TaskNotFoundException;
-import org.glassfish.hk2.utilities.reflection.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
