@@ -29,12 +29,11 @@ public class CompileController {
         return code;
     }
 
-    //TODO: FIX configuration in spring security 403 error
-    @PostMapping(value = "/compile", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String postCompile(@RequestBody UserCode code) {
+    @PostMapping(value = "/compile")
+    public String postCompile(@RequestBody String code) {
 
-        UserCode userCode = new UserCode(incrementCodeID(), "C", code.getUserCode());
-        System.out.println(code.getUserCode());
+        UserCode userCode = new UserCode(incrementCodeID(), "C", code);
+        System.out.println(code);
         return compilationService.compileUserCode(userCode);
     }
 

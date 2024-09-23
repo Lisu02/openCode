@@ -1,6 +1,10 @@
-package com.example.openCode.CompilationModule.Service.Prototype;
+package com.example.openCode.CompilationModule.Service.DockerHandler.GCC;
 
 import com.example.openCode.CompilationModule.Model.UserCode;
+import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerIdList;
+import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerStatus;
+import com.example.openCode.CompilationModule.Service.DockerHandler.DockerConfiguration;
+import com.example.openCode.CompilationModule.Service.DockerHandler.MyResultCallback;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.ExecCreateCmdResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
@@ -33,14 +37,12 @@ public class DockerCompilatorGCC {
         String compileComand = "gcc -o /tmp/" + catalogName + " /tmp/" + catalogName + ".c";
 
 
-        if (!isContainerRunning()) {
+        if (!ContainerStatus.isContainerRunning(gccContainerId)) {
             dockerClient.startContainerCmd(gccContainerId).exec();
-            //log.atInfo().log("Starting a GCC container: " + gccContainerId);
-        } else {
-            //log.atInfo().log("GCC Container is running no need for starting");
-        }
+            }
 
         //System.out.println(dockerClient.listContainersCmd().exec());
+        System.out.println(sourceCode);
         ExecCreateCmdResponse execCompileUserCode = dockerClient.execCreateCmd(gccContainerId)
                 .withAttachStdout(true)
                 .withAttachStdin(true)
@@ -65,11 +67,8 @@ public class DockerCompilatorGCC {
     //TODO: add catalogName for userCode recognition
     public String runCode(String catalogName) throws InterruptedException {
 
-        if (!isContainerRunning()) {
+        if (!ContainerStatus.isContainerRunning(gccContainerId)) {
             dockerClient.startContainerCmd(gccContainerId).exec();
-            //log.atInfo().log("Starting a GCC container: " + gccContainerId);
-        } else {
-            //log.atInfo().log("GCC Container is running no need for starting");
         }
 
         ExecCreateCmdResponse execRun = dockerClient.execCreateCmd(gccContainerId)

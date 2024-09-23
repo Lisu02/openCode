@@ -44,7 +44,7 @@ public  class TaskMapper {
                 .returnType(task.getReturnType().toString())
                 .functionName(task.getFunctionName())
                 .argumentList(mapFunctionArgumentListToDTO(task.getArgumentList()))
-                .testList(null)
+                .testList(mapTestTaskListToDTO(task.getTestList()))
                 .build();
     }
 
@@ -90,8 +90,7 @@ public  class TaskMapper {
 
     public List<FunctionArgumentDTO> mapFunctionArgumentListToDTO(List<FunctionArgument> functionArgument){
         //TODO: return list of functionArguments in DTO format
-
-        return null;
+        return functionArgument.stream().map(argument -> mapFunctionArgumentToDTO(argument)).toList();
     }
 
     public List<FunctionArgument> mapFunctionArgumentDTOListToObject(List<FunctionArgumentDTO> functionArgumentDTOList){
@@ -104,6 +103,8 @@ public  class TaskMapper {
     //TestTask
     public TestTaskDTO mapTestTaskToDTO(TestTask testTask){
         return TestTaskDTO.builder()
+                .id(testTask.getId())
+                .taskId(testTask.getTask().getId())
                 .expectedValue(testTask.getExpectedValue())
                 .testInputArgumentDTOList(mapTestInputArgumentListToDTO(testTask.getTestArguments()))
                 .build();
@@ -134,8 +135,10 @@ public  class TaskMapper {
     //TestInputArgument (TestArguments) todo:rename arguments
     public TestInputArgumentDTO mapTestInputArgumentToDTO(TestArgument testArgument){
         return TestInputArgumentDTO.builder()
+                .id(testArgument.getId())
                 .type(testArgument.getType().toString())
                 .testArgument(testArgument.getArgument())
+                .testTaskId(testArgument.getTestTask().getId())
                 .build();
     }
 
