@@ -28,27 +28,29 @@ public class TaskService {
     FunctionArgumentRepository functionArgumentRepository;
     TestTaskRepository testTaskRepository;
     TestArgumentRepository testArgumentRepository;
+    TaskMapper taskMapper;
 
 
     @Autowired
     public TaskService(TaskRepository taskRepository,
                        FunctionArgumentRepository functionArgumentRepository,
                        TestTaskRepository testTaskRepository,
-                       TestArgumentRepository testArgumentRepository
+                       TestArgumentRepository testArgumentRepository,
+                       TaskMapper taskMapper
     ){
         this.taskRepository = taskRepository;
         this.functionArgumentRepository = functionArgumentRepository;
         this.testTaskRepository = testTaskRepository;
         this.testArgumentRepository = testArgumentRepository;
+        this.taskMapper = taskMapper;
     }
 
     //-------------GETTING TASKS-------------
 
     public List<TaskDTO> getTaskDTOList(){
         List<Task> taskList = taskRepository.findAll();
-        return mapTaskListToTaskDTOList(taskList);
+        return taskMapper.mapTaskListToTaskDTOList(taskList);
     }
-
 
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
@@ -56,19 +58,19 @@ public class TaskService {
 
     public List<TaskDTO> getAllTasksDTO(){
         List<Task> taskList = taskRepository.findAll();
-        return mapTaskListToTaskDTOList(taskList);
+        return taskMapper.mapTaskListToTaskDTOList(taskList);
     }
 
     public TaskDTO getTaskDTObyId(long id){
         Optional<Task> taskDTO = taskRepository.findById(id);
         if(taskDTO.isEmpty()) return null;
-        return mapTaskToDTO(taskDTO.get());
+        return taskMapper.mapTaskToDTO(taskDTO.get());
     }
 
     //-----------SAVING TASK---------------
 
     public void saveTaskDTO(TaskDTO taskDTO){
-        saveTask(mapTaskDTOtoTask(taskDTO));
+        saveTask(taskMapper.mapTaskDTOtoTask(taskDTO));
     }
 
     public void saveTask(Task task){
@@ -110,138 +112,5 @@ public class TaskService {
         if(testArgumentList != null && !testArgumentList.isEmpty()){
             testArgumentRepository.saveAll(testArgumentList);
         }
-    }
-
-    //-------------------- MAPPING METHODS --------------------
-
-    //MAPPING TASK the highest
-    //MAPPING FUNCTION ARGUMENTS high
-    //MAPPING TESTS TASKS lower
-    //MAPPING TEST INPUT ARGUMENTS lowest
-
-    //Task
-
-    public TaskDTO mapTaskToDTO(Task task){
-        return TaskDTO.builder()
-                .id(task.getId())
-                .returnType(task.getReturnType().toString())
-                .functionName(task.getFunctionName())
-                .argumentList(mapFunctionArgumentListToDTO(task.getArgumentList()))
-                .testList(null)
-                .build();
-    }
-
-    public Task mapTaskDTOtoTask(TaskDTO taskDTO){
-        return Task.builder()
-                .returnType(ReturnType.valueOf(taskDTO.getReturnType().toUpperCase()))
-                .functionName(taskDTO.getFunctionName())
-                .argumentList(mapFunctionArgumentDTOListToObject(taskDTO.getArgumentList()))
-                .testList(mapTestTaskDTOListToObject(taskDTO.getTestList()))
-                .build();
-    }
-
-    public List<TaskDTO> mapTaskListToTaskDTOList(List<Task> taskList){
-        return taskList.stream().map(this::mapTaskToDTO).toList();
-    }
-
-    //FunctionArgument
-    public FunctionArgumentDTO mapFunctionArgumentToDTO(FunctionArgument functionArgument){
-        return FunctionArgumentDTO.builder()
-                .id(functionArgument.getId())
-                .type(functionArgument.getType().toString())
-                .name(functionArgument.getName())
-                .task(functionArgument.getTask().getId())
-                .build();
-    }
-
-    public FunctionArgument mapFunctionArgumentDTOtoObject(FunctionArgumentDTO functionArgumentDTO){
-
-        Optional<Task> taskOptional = taskRepository.findById(functionArgumentDTO.getTask());
-
-        if(taskOptional.isPresent()){
-            return FunctionArgument.builder()
-                    .type(ReturnType.valueOf(functionArgumentDTO.getType()))
-                    .name(functionArgumentDTO.getName())
-                    .task(taskOptional.get())
-                    .build();
-        }else{
-            throw new TaskNotFoundException("Task by id " + functionArgumentDTO.getTask() + " does not exits in database");
-        }
-
-
-    }
-
-    public List<FunctionArgumentDTO> mapFunctionArgumentListToDTO(List<FunctionArgument> functionArgument){
-        //TODO: return list of functionArguments in DTO format
-
-        return null;
-    }
-
-    public List<FunctionArgument> mapFunctionArgumentDTOListToObject(List<FunctionArgumentDTO> functionArgumentDTOList){
-        return functionArgumentDTOList.stream()
-                .map(this::mapFunctionArgumentDTOtoObject)
-                .collect(Collectors.toList());
-    }
-
-
-    //TestTask
-    public TestTaskDTO mapTestTaskToDTO(TestTask testTask){
-        return TestTaskDTO.builder()
-                .expectedValue(testTask.getExpectedValue())
-                .testInputArgumentDTOList(mapTestInputArgumentListToDTO(testTask.getTestArguments()))
-                .build();
-    }
-
-    public TestTask mapTestTaskDTOtoObject(TestTaskDTO testTaskDTO){
-
-        Optional<Task> task = taskRepository.findById(testTaskDTO.getTaskId());
-        if(task.isEmpty()){
-            return null;
-        }
-        return TestTask.builder()
-                .testArguments(mapTestInputArgumentDTOListToObject(testTaskDTO.getTestInputArgumentDTOList()))
-                .expectedValue(testTaskDTO.getExpectedValue())
-                .task(task.get())
-                .build();
-    }
-
-    public List<TestTaskDTO> mapTestTaskListToDTO(List<TestTask> testTaskList){
-        return testTaskList.stream().map(this::mapTestTaskToDTO).toList();
-    }
-
-    public List<TestTask> mapTestTaskDTOListToObject(List<TestTaskDTO> testListDTO) {
-        return testListDTO.stream().map(this::mapTestTaskDTOtoObject).collect(Collectors.toList());
-    }
-
-
-    //TestInputArgument (TestArguments) todo:rename arguments
-    public TestInputArgumentDTO mapTestInputArgumentToDTO(TestArgument testArgument){
-        return TestInputArgumentDTO.builder()
-                .type(testArgument.getType().toString())
-                .testArgument(testArgument.getArgument())
-                .build();
-    }
-
-    public TestArgument mapTestInputArgumentDTOtoObject(TestInputArgumentDTO testInputArgumentDTO){
-        Optional<TestTask> testTask = testTaskRepository.findById(testInputArgumentDTO.getTestTaskId());
-        if(testTask.isEmpty()){
-            return null;
-        }
-
-        return TestArgument.builder()
-                .type(ReturnType.valueOf(testInputArgumentDTO.getType().toUpperCase()))
-                .argument(testInputArgumentDTO.getTestArgument())
-                .testTask(testTask.get())
-                .build();
-    }
-
-    public List<TestInputArgumentDTO> mapTestInputArgumentListToDTO(List<TestArgument> testArgumentList){
-        return testArgumentList.stream().map(this::mapTestInputArgumentToDTO).toList();
-    }
-
-    private List<TestArgument> mapTestInputArgumentDTOListToObject(List<TestInputArgumentDTO> testInputArgumentDTOList) {
-        return testInputArgumentDTOList.stream()
-                .map(this::mapTestInputArgumentDTOtoObject)
-                .collect(Collectors.toList());
     }
 }
