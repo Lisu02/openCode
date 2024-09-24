@@ -67,6 +67,12 @@ public class TaskService {
         return taskMapper.mapTaskToDTO(taskDTO.get());
     }
 
+    public Task getTaskById(long id){
+        Optional<Task> task = taskRepository.findById(id);
+        if(task.isEmpty()) return null;
+        return task.get();
+    }
+
     //-----------SAVING TASK---------------
 
     public void saveTaskDTO(TaskDTO taskDTO){

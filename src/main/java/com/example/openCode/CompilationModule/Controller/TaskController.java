@@ -6,6 +6,7 @@ import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.Task;
 import com.example.openCode.CompilationModule.Model.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.TestTask.TestTask;
+import com.example.openCode.CompilationModule.Service.DockerHandler.GCC.TaskCreatorGCC;
 import com.example.openCode.CompilationModule.Service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +18,12 @@ import java.util.List;
 public class TaskController {
 
     TaskService taskService;
+    TaskCreatorGCC taskCreatorGCC;
 
     @Autowired
-    public TaskController(TaskService taskService){
+    public TaskController(TaskService taskService,TaskCreatorGCC taskCreatorGCC){
         this.taskService = taskService;
+        this.taskCreatorGCC = taskCreatorGCC;
     }
 
 
@@ -35,18 +38,31 @@ public class TaskController {
         testArguments.add(new TestArgument(1,ReturnType.INT,"4",null));
         testArguments.add(new TestArgument(2,ReturnType.INT,"10",null));
 
+        LinkedList<TestArgument> testArguments2 = new LinkedList<>();
+        testArguments2.add(new TestArgument(1,ReturnType.INT,"10",null));
+        testArguments2.add(new TestArgument(2,ReturnType.INT,"5",null));
+
+
         TestTask testTask = new TestTask(0,null,testArguments,"40");
+
+        TestTask testTask2 = new TestTask(0,null,testArguments2,"50");
 
         LinkedList<TestTask> testTaskLinkedList = new LinkedList<>();
         testTaskLinkedList.add(testTask);
+        testTaskLinkedList.add(testTask2);
 
-        Task task = new Task(0,ReturnType.INT,"power", functionArguments, testTaskLinkedList);
+        Task task = new Task(0,ReturnType.INT,"mnozenie", functionArguments, testTaskLinkedList);
 
         functionArguments.get(0).setTask(task);
         functionArguments.get(1).setTask(task);
         testTask.setTask(task);
+        testTask2.setTask(task);
+
         testArguments.get(0).setTestTask(testTask);
         testArguments.get(1).setTestTask(testTask);
+
+        testArguments2.get(0).setTestTask(testTask2);
+        testArguments2.get(1).setTestTask(testTask2);
 
         taskService.saveTask(task);
     }
@@ -59,6 +75,16 @@ public class TaskController {
     @GetMapping("/v1/task/{id}")
     public TaskDTO getTaskById(@PathVariable("id") long id){
         return taskService.getTaskDTObyId(id);
+    }
+
+    @GetMapping("/v1/addTask/{id}")
+    public void generateTask(@PathVariable("id")long id){
+        Task task = taskService.getTaskById(id);
+        if(task != null){
+            taskCreatorGCC.createTaskInContainer(task);
+        }else{
+            System.out.println("BRAK TASKA");
+        }
     }
 
     @PostMapping("/v1/task")

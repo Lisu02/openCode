@@ -3,6 +3,7 @@ package com.example.openCode.CompilationModule.Service.DockerHandler.GCC;
 import com.example.openCode.CompilationModule.Model.ReturnType;
 import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.Task;
+import com.example.openCode.CompilationModule.Model.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.TestTask.TestTask;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerIdList;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerStatus;
@@ -12,10 +13,12 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.ExecCreateCmdResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.Formatter;
 import java.util.Iterator;
 
+@Component
 public class TaskCreatorGCC {
 
     //This class role is to create code tasks inside a docker container that can
@@ -26,15 +29,45 @@ public class TaskCreatorGCC {
     String gccContainerId = ContainerIdList.getGccContainerId();
 
 
+    public void createTaskInContainer(Task task){
+        if(isTaskReadyForCreation(task)){
+            String catalogName = task.getId() + "-" + task.getFunctionName();
+            createTaskFiles(task,catalogName);
+            StringBuilder testCodeForUser = new StringBuilder();
+            StringBuilder testCodeForTests = new StringBuilder();
+            generateTaskCodeForUser(task,testCodeForUser,true);
+            generateTaskCodeForTests(task,testCodeForTests,catalogName);
+
+
+            ExecCreateCmdResponse createTaskDocker = dockerClient.execCreateCmd(gccContainerId)
+                    .withAttachStderr(true)
+                    .withAttachStdin(true)
+                    .withAttachStdout(true)
+                    .withCmd("sh", "-c",
+                            "echo \"" + testCodeForTests.toString().replace("\"", "\\\"") + "\" > tmp/" + catalogName + "/test.c && " +
+                                    "echo \"" + testCodeForUser.toString().replace("\"", "\\\"") + "\" > tmp/" + catalogName + "/" + task.getFunctionName() + ".c"
+                    )
+                    .exec();
+            MyResultCallback callback = new MyResultCallback();
+            dockerClient.execStartCmd(createTaskDocker.getId()).exec(callback);
+            try {
+                callback.awaitCompletion();
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
+            System.out.println(callback.getOutput());
+        }
+    }
+
+
     private void createTaskFiles(Task task, String catalog){
         ExecCreateCmdResponse execCreateTaskFiles = dockerClient.execCreateCmd(gccContainerId)
                 .withAttachStdin(true)
                 .withAttachStdout(true)
-                .withCmd("mkdir", "tmp/" + catalog + " &&" +
-                        "rm tmp/"+catalog + "/*" + " &&"
-                        + "touch" +
-                        " tmp/"+catalog + "/" + "test.c" +
-                        " tmp/"+catalog + "/" + task.getFunctionName() + ".c"
+                .withCmd("sh", "-c",
+                        "mkdir -p tmp/" + catalog + " && " + // Tworzenie katalogu z flagą -p (jeśli nie istnieje)
+                                "rm -f tmp/" + catalog + "/* && " +  // Usuwanie istniejących plików (jeśli są)
+                                "touch tmp/" + catalog + "/test.c tmp/" + catalog + "/" + task.getFunctionName() + ".c" // Tworzenie nowych plików
                 )
                 .exec();
         MyResultCallback createTaskFilesCallback = new MyResultCallback();
@@ -44,19 +77,11 @@ public class TaskCreatorGCC {
         }catch (InterruptedException e ){
             e.printStackTrace();
         }
+        System.out.println(createTaskFilesCallback.getOutput());
     }
 
-    public void createTaskInContainer(Task task){
-        if(isTaskReadyForCreation(task)){
-            String catalogName = task.getId() + "-" + task.getFunctionName();
-            createTaskFiles(task,catalogName);
-            String codeForUser = generateTaskCodeForUser(task,true);
-            String codeForTests = generateTaskCodeForTests(task,catalogName);
-        }
-    }
-
-    private String generateTaskCodeForUser(Task task,boolean withBrackets){
-        StringBuilder builder = new StringBuilder();
+    private void generateTaskCodeForUser(Task task,StringBuilder builder,boolean withBrackets){
+        //StringBuilder builder = new StringBuilder();
         builder.append(task.getReturnType().toString().toLowerCase()); //RETURN TYPE
         builder.append(" ");
         builder.append(task.getFunctionName());
@@ -65,23 +90,60 @@ public class TaskCreatorGCC {
         FunctionArgument functionArgumentTMP;
         while(iterator.hasNext()){
             functionArgumentTMP = iterator.next();
-            builder.append(functionArgumentTMP.getType()).append(" ").append(functionArgumentTMP.getName());
+            builder.append(functionArgumentTMP.getType().toString().toLowerCase()).append(" ").append(functionArgumentTMP.getName());
             if(iterator.hasNext()){builder.append(", ");}
         }
-        builder.append(");\n");
-        if(withBrackets){builder.append("{\n}");}
-        return builder.toString();
+        if(withBrackets){builder.append(")\n{\n}");}
+        else{builder.append(");\n");}
     }
-    private String generateTaskCodeForTests(Task task,String catalog){
-        StringBuilder builder = new StringBuilder();
+    private void generateTaskCodeForTests(Task task,StringBuilder builder,String catalog){
+        //StringBuilder builder = new StringBuilder();
+        //todo: dodac wyciaganie danych z taska zeby za kazdym razem nie uzywac iteratora jakos czytelniej??
         builder.append("#include <stdio.h>\n");
-
-        builder.append(generateTaskCodeForUser(task,false));
+        generateTaskCodeForUser(task,builder,false);
 
         builder.append("#define OPERATION \"");
         builder.append(task.getFunctionName());
         builder.append("\"\n");
 
+        generateTestFunctionToDocker(task, builder);
+
+        generateTestMainFunction(task, builder);
+    }
+
+    private static void generateTestMainFunction(Task task, StringBuilder builder) {
+        builder.append("int main(){\n");
+        builder.append("\tint testOverall = 0;\n");
+        builder.append("\tint testFailed = 0;\n");
+
+        Iterator<TestTask> testIterator = task.getTestList().iterator();
+        TestTask testTaskTMP;
+        Iterator<TestArgument> testArgumentIterator;
+        TestArgument testArgument;
+
+        while(testIterator.hasNext()){
+            testTaskTMP = testIterator.next();
+            builder.append("\ttest(");
+            builder.append(task.getFunctionName());
+            builder.append(", ");
+            testArgumentIterator = testTaskTMP.getTestArguments().iterator();
+            while(testArgumentIterator.hasNext()){
+                testArgument = testArgumentIterator.next();
+                builder.append(testArgument.getArgument());
+                builder.append(", ");
+            }
+            builder.append(testTaskTMP.getExpectedValue());
+            builder.append(", ");
+            builder.append("&testOverall, &testFailed);\n");
+        }
+
+        builder.append("\tprintf(\"\\n overall: %d, failed %d \", testOverall, testFailed);\n");
+
+        builder.append("\treturn 0;\n");
+
+        builder.append("}");
+    }
+    private void generateTestFunctionToDocker(Task task, StringBuilder builder) {
         builder.append("void test(");
         builder.append(task.getReturnType().toString().toLowerCase());
         builder.append(" (*operation)(");
@@ -90,7 +152,8 @@ public class TaskCreatorGCC {
         while(iterator.hasNext()){
             functionArgumentTMP = iterator.next();
             builder.append(functionArgumentTMP.getType().toString().toLowerCase());
-            if(iterator.hasNext()){builder.append(",");}
+            if(iterator.hasNext()){
+                builder.append(",");}
         }
         iterator = task.getArgumentList().iterator();
         builder.append("),");
@@ -101,7 +164,8 @@ public class TaskCreatorGCC {
             builder.append(functionArgumentTMP.getName());
             builder.append(","); //Lack of hasNext check is on purpose
         }
-        builder.append("int* overall,int* failed){\n");
+        builder.append(task.getReturnType().toString().toLowerCase());
+        builder.append(" expected,int* overall,int* failed){\n"); //space is necessary
 
         builder.append("\t");
         builder.append(task.getReturnType().toString().toLowerCase());
@@ -110,7 +174,8 @@ public class TaskCreatorGCC {
         while (iterator.hasNext()){
             functionArgumentTMP = iterator.next();
             builder.append(functionArgumentTMP.getName());
-            if(iterator.hasNext()){builder.append(",");}
+            if(iterator.hasNext()){
+                builder.append(",");}
         }
         builder.append(");\n");
 
@@ -118,29 +183,55 @@ public class TaskCreatorGCC {
 
         builder.append("\tif(result == expected) {\n");
 
-        builder.append("\tprintf(\"Test passed: %s(");
+        builder.append("\t\tprintf(\"Test passed: %s(");
         iterator = task.getArgumentList().iterator();
         while (iterator.hasNext()){
             functionArgumentTMP = iterator.next();
             builder.append(printfSpecifiers(functionArgumentTMP.getType()));
-            if(iterator.hasNext()){builder.append(", ");}
+            if(iterator.hasNext()){
+                builder.append(", ");}
         }
         builder.append(") == ");
         builder.append(printfSpecifiers(task.getReturnType()));
-        builder.append("\n\",OPERATION,");
+        builder.append("\",OPERATION,");
         iterator = task.getArgumentList().iterator();
         while (iterator.hasNext()){
             functionArgumentTMP = iterator.next();
             builder.append(functionArgumentTMP.getName());
-            if(iterator.hasNext()){builder.append(",");}
+            builder.append(",");
         }
-        builder.append(");\n");
+        builder.append("expected);\n");
 
         builder.append("\t} else {\n");
 
-        //todo:Dokonczyc generowanie pliku z testami
-        return null;
+        builder.append("\t\tprintf(\"Test failed: %s(");
+        iterator = task.getArgumentList().iterator();
+        while (iterator.hasNext()){
+            functionArgumentTMP = iterator.next();
+            builder.append(printfSpecifiers(functionArgumentTMP.getType()));
+            if(iterator.hasNext()){
+                builder.append(", ");}
+        }
+        builder.append(") == ");
+        builder.append(printfSpecifiers(task.getReturnType()));
+        builder.append(", got ");
+        builder.append(printfSpecifiers(task.getReturnType()));
+        builder.append(" instead\",OPERATION,");
+        iterator = task.getArgumentList().iterator();
+        while (iterator.hasNext()){
+            functionArgumentTMP = iterator.next();
+            builder.append(functionArgumentTMP.getName());
+            builder.append(", ");
+        }
+        builder.append("expected, result);\n");
+
+        builder.append("\t\t*failed = *failed + 1;\n");
+
+        builder.append("\t}\n");
+
+        builder.append("}\n");
     }
+
 
     private String printfSpecifiers(ReturnType returnType){
         return switch (returnType){
@@ -151,7 +242,6 @@ public class TaskCreatorGCC {
             case STRING -> "%s";
         };
     }
-
     private boolean isTaskReadyForCreation(Task task){
         if(task.getArgumentList() == null || task.getTestList() == null){
             log.warn("Task: {}is not ready for creation inside a GCC container", task.getId());
