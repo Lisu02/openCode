@@ -6,6 +6,8 @@ import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 
 public class DockerTests {
 
@@ -13,14 +15,13 @@ public class DockerTests {
 
     @Test
     public void gettingContainerId(){
-        //DockerConfiguration dockerConfiguration = new DockerConfiguration();
         DockerConfiguration.printDockerContainerList();
     }
 
     @Test
     public void gettingContainerGCC(){
-        //DockerConfiguration.printDockerContainerList();
-        System.out.printf("---------GCC---------\n");
+        System.out.printf("---------GCC container id---------\n");
         System.out.printf(DockerConfiguration.getDockerContainerGCC() + "\n");
+        assertThat(DockerConfiguration.getDockerContainerGCC()).isNotNull();
     }
 }

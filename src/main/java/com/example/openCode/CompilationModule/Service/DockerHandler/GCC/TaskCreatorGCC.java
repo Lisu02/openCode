@@ -59,6 +59,11 @@ public class TaskCreatorGCC {
         }
     }
 
+    public boolean isTaskCreatedinDockerContainer(Task task){
+       // dockerClient
+        return false;
+    }
+
 
     private void createTaskFiles(Task task, String catalog){
         ExecCreateCmdResponse execCreateTaskFiles = dockerClient.execCreateCmd(gccContainerId)

@@ -1,10 +1,6 @@
-package com.example.openCode.CompilationModule.Service;
+package com.example.openCode.CompilationModule.Service.Task;
 
-import com.example.openCode.CompilationModule.DTO.FunctionArgumentDTO;
 import com.example.openCode.CompilationModule.DTO.TaskDTO;
-import com.example.openCode.CompilationModule.DTO.TestInputArgumentDTO;
-import com.example.openCode.CompilationModule.DTO.TestTaskDTO;
-import com.example.openCode.CompilationModule.Model.*;
 import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.Task;
 import com.example.openCode.CompilationModule.Model.TestTask.TestArgument;
@@ -13,13 +9,11 @@ import com.example.openCode.CompilationModule.Repository.FunctionArgumentReposit
 import com.example.openCode.CompilationModule.Repository.TaskRepository;
 import com.example.openCode.CompilationModule.Repository.TestArgumentRepository;
 import com.example.openCode.CompilationModule.Repository.TestTaskRepository;
-import com.example.openCode.CompilationModule.Service.Exception.TaskNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -118,5 +112,9 @@ public class TaskService {
         if(testArgumentList != null && !testArgumentList.isEmpty()){
             testArgumentRepository.saveAll(testArgumentList);
         }
+    }
+
+    public String solveTask(String code) {
+        return "";
     }
 }

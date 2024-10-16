@@ -7,7 +7,7 @@ import com.example.openCode.CompilationModule.Model.Task.Task;
 import com.example.openCode.CompilationModule.Model.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.TestTask.TestTask;
 import com.example.openCode.CompilationModule.Service.DockerHandler.GCC.TaskCreatorGCC;
-import com.example.openCode.CompilationModule.Service.TaskService;
+import com.example.openCode.CompilationModule.Service.Task.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +29,7 @@ public class TaskController {
 
     @GetMapping("/v1/addTasksTest")
     public void addTaskForTestingPurposes(){
-
+        //TODO: POPRAWIĆ ZAPISYWANIE ZŁOŻONYCH TESTÓW PONIEWAŻ FUNKCJA GENERUJACA TESTY ROBI BŁEDY NA BŁEDNYCH DANYCH
         LinkedList<FunctionArgument> functionArguments = new LinkedList<>();
         functionArguments.add(new FunctionArgument(0,ReturnType.INT,"liczba",null));
         functionArguments.add(new FunctionArgument(1,ReturnType.INT,"mnoznik",null));
@@ -84,6 +84,17 @@ public class TaskController {
             taskCreatorGCC.createTaskInContainer(task);
         }else{
             System.out.println("BRAK TASKA");
+        }
+    }
+
+
+    @PostMapping("v1/task/resolve/{id}")
+    public String resolveTask(@PathVariable("id") long id,String code){
+        Task task = taskService.getTaskById(id);
+        if(task != null){
+            return taskService.solveTask(code);
+        }else{
+            return "TASK NOT FOUND";
         }
     }
 
