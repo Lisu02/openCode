@@ -36,4 +36,13 @@ public class DockerConfiguration {
         }
         System.out.println("--------End of List--------");
     }
+
+    public static String getDockerContainerGCC(){
+        for(Container container : dockerClient.listContainersCmd().exec()){
+            if(container.getImage().contains("gcc")){
+                return container.getId();
+            }
+        }
+        return null;
+    }
 }

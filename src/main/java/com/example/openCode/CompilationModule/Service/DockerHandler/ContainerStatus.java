@@ -8,7 +8,7 @@ public class ContainerStatus {
 
     //Information about status of the containers
 
-    private ContainerStatus(){}
+    public ContainerStatus(){}
 
     public static DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
     @Getter
