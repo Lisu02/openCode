@@ -1,6 +1,6 @@
-package com.example.openCode.CompilationModule.Model.TestTask;
+package com.example.openCode.CompilationModule.Model.Task.TestTask;
 
-import com.example.openCode.CompilationModule.Model.ReturnType;
+import com.example.openCode.CompilationModule.Model.Task.ReturnType;
 import jakarta.persistence.*;
 import lombok.*;
 

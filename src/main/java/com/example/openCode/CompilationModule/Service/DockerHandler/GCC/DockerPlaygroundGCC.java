@@ -1,6 +1,6 @@
 package com.example.openCode.CompilationModule.Service.DockerHandler.GCC;
 
-import com.example.openCode.CompilationModule.Model.UserCode;
+import com.example.openCode.CompilationModule.Model.PlaygroundCode;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerIdList;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerStatus;
 import com.example.openCode.CompilationModule.Service.DockerHandler.DockerConfiguration;
@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class DockerCompilatorGCC {
+public class DockerPlaygroundGCC {
 
-    private static final Logger log = LoggerFactory.getLogger(DockerCompilatorGCC.class);
+    private static final Logger log = LoggerFactory.getLogger(DockerPlaygroundGCC.class);
     DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
     //TODO:Sprawdzanie id kontenera po liscie
     String gccContainerId = ContainerIdList.getGccContainerId();
@@ -29,10 +29,16 @@ public class DockerCompilatorGCC {
         return Boolean.TRUE.equals(inspectResponse.getState().getRunning());
     }
 
-    public String compile(UserCode userCode) {
 
-        String sourceCode = userCode.getUserCode();
-        String catalogName = userCode.getId().toString();
+
+
+
+    //-----------OpenCode Playground------------
+
+    public String compile(PlaygroundCode playgroundCode) {
+
+        String sourceCode = playgroundCode.getCode();
+        String catalogName = playgroundCode.getId().toString();
 
         String compileComand = "gcc -o /tmp/" + catalogName + " /tmp/" + catalogName + ".c";
 
@@ -63,7 +69,6 @@ public class DockerCompilatorGCC {
         return callbackCompile.getOutput();
     }
 
-
     //TODO: add catalogName for userCode recognition
     public String runCode(String catalogName) throws InterruptedException {
 
@@ -81,7 +86,7 @@ public class DockerCompilatorGCC {
 
         dockerClient.execStartCmd(execRun.getId()).exec(callbackRun);
         //TODO:Ustawic timeouty dla zadan
-        callbackRun.awaitCompletion(1500, TimeUnit.MILLISECONDS);
+        callbackRun.awaitCompletion(1500,TimeUnit.MILLISECONDS);
         String output = callbackRun.getOutput();
         log.atInfo().log("Runnable output -> \n" + output);
 
@@ -97,10 +102,10 @@ public class DockerCompilatorGCC {
     }
 
     //Overloaded method
-    public String runCode(UserCode userCode) {
+    public String runCode(PlaygroundCode playgroundCode) {
         String output = "empty";
         try {
-            output = runCode(userCode.getId().toString());
+            output = runCode(playgroundCode.getId().toString());
         } catch (InterruptedException e) {
             e.printStackTrace();
             dockerClient.stopContainerCmd(gccContainerId);

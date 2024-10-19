@@ -3,8 +3,8 @@ package com.example.openCode.CompilationModule.Service.Task;
 import com.example.openCode.CompilationModule.DTO.TaskDTO;
 import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.Task;
-import com.example.openCode.CompilationModule.Model.TestTask.TestArgument;
-import com.example.openCode.CompilationModule.Model.TestTask.TestTask;
+import com.example.openCode.CompilationModule.Model.Task.TestTask.TestArgument;
+import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
 import com.example.openCode.CompilationModule.Repository.FunctionArgumentRepository;
 import com.example.openCode.CompilationModule.Repository.TaskRepository;
 import com.example.openCode.CompilationModule.Repository.TestArgumentRepository;
@@ -114,7 +114,4 @@ public class TaskService {
         }
     }
 
-    public String solveTask(String code) {
-        return "";
-    }
 }

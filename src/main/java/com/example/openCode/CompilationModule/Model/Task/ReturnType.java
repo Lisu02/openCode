@@ -1,4 +1,4 @@
-package com.example.openCode.CompilationModule.Model;
+package com.example.openCode.CompilationModule.Model.Task;
 
 
 public enum ReturnType {

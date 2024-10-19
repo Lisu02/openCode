@@ -10,9 +10,8 @@ public class ContainerStatus {
 
     public ContainerStatus(){}
 
-    public static DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
-    @Getter
-    public static String gccContainerId = ContainerIdList.getGccContainerId();
+    private static DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
+    private static String gccContainerId = ContainerIdList.getGccContainerId();
 
     //TODO: Dynamiczne pobieranie id kontenerów (docelowo w liczbie mnogiej do puli kompilatorów)
 

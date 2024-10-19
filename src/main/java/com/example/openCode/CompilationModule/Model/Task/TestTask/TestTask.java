@@ -1,4 +1,4 @@
-package com.example.openCode.CompilationModule.Model.TestTask;
+package com.example.openCode.CompilationModule.Model.Task.TestTask;
 
 import com.example.openCode.CompilationModule.Model.Task.Task;
 import jakarta.persistence.*;

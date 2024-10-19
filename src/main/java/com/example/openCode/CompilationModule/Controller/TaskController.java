@@ -1,12 +1,12 @@
 package com.example.openCode.CompilationModule.Controller;
 
 import com.example.openCode.CompilationModule.DTO.TaskDTO;
-import com.example.openCode.CompilationModule.Model.ReturnType;
+import com.example.openCode.CompilationModule.Model.Task.ReturnType;
 import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.Task;
-import com.example.openCode.CompilationModule.Model.TestTask.TestArgument;
-import com.example.openCode.CompilationModule.Model.TestTask.TestTask;
-import com.example.openCode.CompilationModule.Service.DockerHandler.GCC.TaskCreatorGCC;
+import com.example.openCode.CompilationModule.Model.Task.TestTask.TestArgument;
+import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
+import com.example.openCode.CompilationModule.Service.DockerHandler.GCC.DockerTaskGCC;
 import com.example.openCode.CompilationModule.Service.Task.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +18,12 @@ import java.util.List;
 public class TaskController {
 
     TaskService taskService;
-    TaskCreatorGCC taskCreatorGCC;
+    DockerTaskGCC dockerTaskGCC;
 
     @Autowired
-    public TaskController(TaskService taskService,TaskCreatorGCC taskCreatorGCC){
+    public TaskController(TaskService taskService, DockerTaskGCC dockerTaskGCC){
         this.taskService = taskService;
-        this.taskCreatorGCC = taskCreatorGCC;
+        this.dockerTaskGCC = dockerTaskGCC;
     }
 
 
@@ -81,7 +81,7 @@ public class TaskController {
     public void generateTask(@PathVariable("id")long id){
         Task task = taskService.getTaskById(id);
         if(task != null){
-            taskCreatorGCC.createTaskInContainer(task);
+            dockerTaskGCC.createTaskInContainer(task);
         }else{
             System.out.println("BRAK TASKA");
         }
@@ -92,7 +92,8 @@ public class TaskController {
     public String resolveTask(@PathVariable("id") long id,String code){
         Task task = taskService.getTaskById(id);
         if(task != null){
-            return taskService.solveTask(code);
+            //return taskService.solveTask(code);
+            return null;
         }else{
             return "TASK NOT FOUND";
         }

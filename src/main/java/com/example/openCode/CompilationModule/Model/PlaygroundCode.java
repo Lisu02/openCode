@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonSerialize
-public class UserCode {
+public class PlaygroundCode {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -18,6 +18,6 @@ public class UserCode {
     @Column(name = "language")
     private String programmingLanguage;
 
-    @Column(name = "userCode")
-    private String userCode;
+    @Column(name = "code")
+    private String code;
 }

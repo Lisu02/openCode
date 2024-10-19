@@ -1,12 +1,11 @@
 package com.example.openCode.CompilationModule.Service.DockerHandler.GCC;
 
-import com.example.openCode.CompilationModule.Model.ReturnType;
+import com.example.openCode.CompilationModule.Model.Task.ReturnType;
 import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.Task;
-import com.example.openCode.CompilationModule.Model.TestTask.TestArgument;
-import com.example.openCode.CompilationModule.Model.TestTask.TestTask;
+import com.example.openCode.CompilationModule.Model.Task.TestTask.TestArgument;
+import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerIdList;
-import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerStatus;
 import com.example.openCode.CompilationModule.Service.DockerHandler.DockerConfiguration;
 import com.example.openCode.CompilationModule.Service.DockerHandler.MyResultCallback;
 import com.github.dockerjava.api.DockerClient;
@@ -15,16 +14,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Formatter;
 import java.util.Iterator;
 
 @Component
-public class TaskCreatorGCC {
+public class DockerTaskGCC {
 
     //This class role is to create code tasks inside a docker container that can
     //be run to check if the solution of the user is correct
 
-    private static final Logger log = LoggerFactory.getLogger(TaskCreatorGCC.class);
+    private static final Logger log = LoggerFactory.getLogger(DockerTaskGCC.class);
     DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
     String gccContainerId = ContainerIdList.getGccContainerId();
 
@@ -59,9 +57,31 @@ public class TaskCreatorGCC {
         }
     }
 
-    public boolean isTaskCreatedinDockerContainer(Task task){
-       // dockerClient
-        return false;
+    public boolean isTaskCreatedInDockerContainer(Task task){
+        String catalogName = task.getId() + "-" + task.getFunctionName();
+        String checkCmd = "[ ! -d tmp/" + catalogName + " ] && " +
+                "[ ! -f tmp/" + catalogName + "/test.c ] && " +
+                "[ ! -f tmp/" + catalogName + "/" + task.getFunctionName() + ".c ] && echo 'true' || echo 'false'";
+
+        try {
+            // Wykonanie jednego zapytania do sprawdzenia katalogu i plików
+            ExecCreateCmdResponse checkCmdResponse = dockerClient.execCreateCmd(gccContainerId)
+                    .withAttachStderr(true)
+                    .withAttachStdout(true)
+                    .withCmd("sh", "-c", checkCmd)
+                    .exec();
+            MyResultCallback callback = new MyResultCallback();
+            dockerClient.execStartCmd(checkCmdResponse.getId()).exec(callback);
+            callback.awaitCompletion();
+
+            // Odczytanie wyniku
+            String output = callback.getOutput().trim();
+            return "true".equals(output);
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 
