@@ -25,7 +25,7 @@ public class PlaygroundController {
     }
 
 
-    @PostMapping("/playgroundCompilation")
+    @PostMapping("/playgroundCompile")
     public String playgroundCompilation(@RequestBody String code) {
         PlaygroundCode playgroundCode = new PlaygroundCode(incrementCodeID(), "C", code);
         System.out.println(code);
