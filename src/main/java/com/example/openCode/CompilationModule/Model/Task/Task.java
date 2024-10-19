@@ -31,4 +31,9 @@ public class Task {
 
     @OneToMany(mappedBy = "task")
     private List<TestTask> testList;
+
+
+    public String getCatalogName(){
+        return getId() + "-" + getFunctionName();
+    }
 }

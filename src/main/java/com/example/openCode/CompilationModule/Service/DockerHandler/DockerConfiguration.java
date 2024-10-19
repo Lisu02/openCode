@@ -14,7 +14,7 @@ public class DockerConfiguration {
 
     static final private DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
 
-    static private DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
+    static final private DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
             .dockerHost(config.getDockerHost())
             .sslConfig(config.getSSLConfig())
             .maxConnections(100)

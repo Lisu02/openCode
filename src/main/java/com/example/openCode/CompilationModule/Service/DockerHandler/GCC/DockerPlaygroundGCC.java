@@ -19,7 +19,6 @@ public class DockerPlaygroundGCC {
 
     private static final Logger log = LoggerFactory.getLogger(DockerPlaygroundGCC.class);
     DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
-    //TODO:Sprawdzanie id kontenera po liscie
     String gccContainerId = ContainerIdList.getGccContainerId();
 
     //private String compileComand = "gcc -o /tmp/hello /tmp/hello.c 2>&1 >/tmp/compile_output.txt";
@@ -70,7 +69,7 @@ public class DockerPlaygroundGCC {
     }
 
     //TODO: add catalogName for userCode recognition
-    public String runCode(String catalogName) throws InterruptedException {
+    public String runCode(String codeFileName) throws InterruptedException {
 
         if (!ContainerStatus.isContainerRunning(gccContainerId)) {
             dockerClient.startContainerCmd(gccContainerId).exec();
@@ -79,7 +78,7 @@ public class DockerPlaygroundGCC {
         ExecCreateCmdResponse execRun = dockerClient.execCreateCmd(gccContainerId)
                 .withAttachStdin(true)
                 .withAttachStdout(true)
-                .withCmd("/tmp/./" + catalogName)
+                .withCmd("/tmp/./" + codeFileName)
                 .exec();
 
         MyResultCallback callbackRun = new MyResultCallback();
@@ -93,7 +92,7 @@ public class DockerPlaygroundGCC {
         ExecCreateCmdResponse execDelete = dockerClient.execCreateCmd(gccContainerId)
                 .withAttachStdin(true)
                 .withAttachStdout(true)
-                .withCmd("rm", "/tmp/" + catalogName, "&&", "rm", "/tmp/" + catalogName + ".c")
+                .withCmd("rm", "/tmp/" + codeFileName, "&&", "rm", "/tmp/" + codeFileName + ".c")
                 .exec();
         MyResultCallback callbackDelete = new MyResultCallback();
         //dockerClient.execStartCmd(execDelete.getId()).exec(callbackDelete);

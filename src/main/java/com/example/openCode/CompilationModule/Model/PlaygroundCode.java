@@ -9,7 +9,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonSerialize
+@Builder
 public class PlaygroundCode {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

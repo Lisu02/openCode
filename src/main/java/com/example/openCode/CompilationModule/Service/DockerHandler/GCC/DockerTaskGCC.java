@@ -29,7 +29,7 @@ public class DockerTaskGCC {
 
     public void createTaskInContainer(Task task){
         if(isTaskReadyForCreation(task)){
-            String catalogName = task.getId() + "-" + task.getFunctionName();
+            String catalogName = task.getCatalogName();
             createTaskFiles(task,catalogName);
             StringBuilder testCodeForUser = new StringBuilder();
             StringBuilder testCodeForTests = new StringBuilder();
@@ -56,6 +56,7 @@ public class DockerTaskGCC {
             System.out.println(callback.getOutput());
         }
     }
+
 
     public boolean isTaskCreatedInDockerContainer(Task task){
         String catalogName = task.getId() + "-" + task.getFunctionName();

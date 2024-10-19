@@ -1,5 +1,6 @@
 package com.example.openCode.CompilationModule.Model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
@@ -11,15 +12,17 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserSolution {
+public class UserSolutionStatistics {
 
     @Id
     private Long id;
 
-    private String solutionCode;
+    @Column(name = "runTime")
+    private Long runTime;
 
-    private Long solvingTaskId;
+    @Column(name = "memoryUsage")
+    private Long memoryUsage;
 
     @OneToOne
-    UserSolutionStatistics userSolutionStatistics;
+    UserSolution userSolution;
 }
