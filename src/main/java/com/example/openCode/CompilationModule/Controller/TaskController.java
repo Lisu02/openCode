@@ -65,6 +65,10 @@ public class TaskController {
         testArguments2.get(1).setTestTask(testTask2);
 
         taskService.saveTask(task);
+        Task tmp = taskService.getTaskById(task.getId());
+        if(tmp != null){
+            taskService.addTaskToDocker(task);
+        }
     }
 
     @GetMapping("/v1/task")

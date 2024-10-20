@@ -22,13 +22,15 @@ public class DockerSolutionGCC {
     String gccContainerId = ContainerIdList.getGccContainerId();
 
     public String solveInDocker(UserSolution userSolution, Task task) {
-        String taskCatalogName = task.getCatalogName();
+        String taskCatalogName = task.getCatalogName(); // 1-mnozenie id-nazwafunkcji
         StringBuilder output = new StringBuilder();
+
         output.append(addUserSolutionToTaskCatalog(userSolution,taskCatalogName));
         if (!output.isEmpty()){
             log.atError().log("Adding user solution to a task catalog failed -> " + output);
             return "Adding user solution to a task catalog failed";
         }
+
         output.append(compile(taskCatalogName,userSolution.getId().toString()));
         if(!output.isEmpty()){
             log.atError().log("Compilation failure: \n" + output);
@@ -36,11 +38,10 @@ public class DockerSolutionGCC {
         }
 
         output.append(runCodeWithTests(taskCatalogName,userSolution.getId().toString()));
-
         return output.toString();
     }
 
-    private String addUserSolutionToTaskCatalog(UserSolution userSolution, String taskCatalogName) {
+    private String addUserSolutionToTaskCatalog(UserSolution userSolution, String taskCatalogName)  {
         ExecCreateCmdResponse addSolutionCodeToCatalog = dockerClient.execCreateCmd(gccContainerId)
                 .withAttachStderr(true)
                 .withAttachStdin(true)
@@ -58,16 +59,30 @@ public class DockerSolutionGCC {
     }
 
     private String compile(String taskCatalogName, String solutionFileName) {
+
+        String operationPath = "/tmp/" + taskCatalogName; // #tmp/1-mnozenie
+
+        //Nazwa pliku po kompilacji -> Kod użytkownika.c -> Testy.c
         ExecCreateCmdResponse compilationCommand = dockerClient.execCreateCmd(gccContainerId)
                 .withAttachStderr(true)
                 .withAttachStdin(true)
                 .withAttachStdout(true)
-                .withCmd("sh","-c")
+                .withCmd("sh","-c","gcc -o " + operationPath + "/" + solutionFileName + " " //gcc -o /tmp/1-mnozenie/1
+                        + operationPath + "/" + solutionFileName + ".c" + " " // /tmp/1-mnozenie/mnozenie.c
+                        + operationPath + "/" + "test.c"  // /tmp/1-mnozenie/test.c
+                )
                 .exec();
         MyResultCallback compilationCallback = new MyResultCallback();
-        //"gcc -c ./tmp/" + taskCatalogName + "/" + solutionFileName + ""
 
-        return "";
+        dockerClient.execStartCmd(compilationCommand.getId()).exec(compilationCallback);
+
+        try{
+            compilationCallback.awaitCompletion();
+        }catch(InterruptedException e){
+            e.printStackTrace();
+        }
+
+        return compilationCallback.getOutput();
     }
 
     private String runCodeWithTests(String taskCatalogName,String solutionFileName){
@@ -75,10 +90,19 @@ public class DockerSolutionGCC {
                 .withAttachStderr(true)
                 .withAttachStdin(true)
                 .withAttachStdout(true)
-                .withCmd("sh","-c")
+                .withCmd("sh","-c","./tmp/" + taskCatalogName + "/" + solutionFileName) // ./tmp/1-mnozenie/1
                 .exec();
         MyResultCallback runCallback = new MyResultCallback();
-        return "";
+
+        dockerClient.execStartCmd(runCommand.getId()).exec(runCallback);
+
+        try{
+            runCallback.awaitCompletion();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return runCallback.getOutput();
     }
 
 

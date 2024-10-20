@@ -60,9 +60,9 @@ public class DockerTaskGCC {
 
     public boolean isTaskCreatedInDockerContainer(Task task){
         String catalogName = task.getId() + "-" + task.getFunctionName();
-        String checkCmd = "[ ! -d tmp/" + catalogName + " ] && " +
-                "[ ! -f tmp/" + catalogName + "/test.c ] && " +
-                "[ ! -f tmp/" + catalogName + "/" + task.getFunctionName() + ".c ] && echo 'true' || echo 'false'";
+        String checkCmd = "[ -d tmp/" + catalogName + " ] && " +
+                "[ -f tmp/" + catalogName + "/test.c ] && " +
+                "[ -f tmp/" + catalogName + "/" + task.getFunctionName() + ".c ] && echo 'true' || echo 'false'";
 
         try {
             // Wykonanie jednego zapytania do sprawdzenia katalogu i plików

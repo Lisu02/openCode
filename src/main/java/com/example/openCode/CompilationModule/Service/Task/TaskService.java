@@ -117,4 +117,7 @@ public class TaskService {
     public boolean taskExist(Long solvingTaskId) {
         return getTaskById(solvingTaskId) != null;
     }
+
+    public void addTaskToDocker(Task task) {
+    }
 }
