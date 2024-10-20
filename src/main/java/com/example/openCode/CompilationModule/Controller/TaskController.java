@@ -30,6 +30,7 @@ public class TaskController {
     @GetMapping("/v1/addTasksTest")
     public void addTaskForTestingPurposes(){
         //TODO: POPRAWIĆ ZAPISYWANIE ZŁOŻONYCH TESTÓW PONIEWAŻ FUNKCJA GENERUJACA TESTY ROBI BŁEDY NA BŁEDNYCH DANYCH
+        //TODO: POPRAWIĆ BRAKI W BAZIE DANYCH PO DODANIU ZADANIA TESTOWEGO
         LinkedList<FunctionArgument> functionArguments = new LinkedList<>();
         functionArguments.add(new FunctionArgument(0,ReturnType.INT,"liczba",null));
         functionArguments.add(new FunctionArgument(1,ReturnType.INT,"mnoznik",null));
@@ -67,7 +68,7 @@ public class TaskController {
         taskService.saveTask(task);
         Task tmp = taskService.getTaskById(task.getId());
         if(tmp != null){
-            taskService.addTaskToDocker(task);
+            generateTask(tmp.getId());
         }
     }
 
