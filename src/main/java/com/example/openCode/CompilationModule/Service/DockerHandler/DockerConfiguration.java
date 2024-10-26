@@ -1,7 +1,9 @@
 package com.example.openCode.CompilationModule.Service.DockerHandler;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
@@ -45,4 +47,10 @@ public class DockerConfiguration {
         }
         return null;
     }
+
+    //kontener read-only poza katalogiem tmp
+//    dockerClient.createContainerCmd("gcc_container_image")
+//            .withReadonlyRootfs(true) // Ustaw kontener jako tylko do odczytu
+//                .withBinds(new Bind("/host/path/to/tmp", new Volume("/tmp"), AccessMode.rw)) // Montowanie /tmp z dostępem do zapisu
+//            .exec();
 }
