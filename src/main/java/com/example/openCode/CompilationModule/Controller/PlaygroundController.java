@@ -4,11 +4,13 @@ import com.example.openCode.CompilationModule.Model.PlaygroundCode;
 import com.example.openCode.CompilationModule.Service.PlaygroundService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
@@ -26,10 +28,12 @@ public class PlaygroundController {
 
 
     @PostMapping("/playgroundCompile")
-    public String playgroundCompilation(@RequestBody String code) {
+    @Async
+    public CompletableFuture<String> playgroundCompilation(@RequestBody String code) {
         PlaygroundCode playgroundCode = new PlaygroundCode(incrementCodeID(), "C", code);
+        System.out.println("------PLAYGROUND CONTROLLER----");
         System.out.println(code);
-        return playgroundService.compilePlaygroundCode(playgroundCode);
+        return CompletableFuture.completedFuture(playgroundService.compilePlaygroundCode(playgroundCode));
     }
 
 

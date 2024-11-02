@@ -44,18 +44,20 @@ public class DockerPlaygroundGCC {
 
         String compileComand = "gcc -o /tmp/" + catalogName + " /tmp/" + catalogName + ".c";
 
+        String createFileCommand = "printf '%s' '".concat(sourceCode).concat("'").concat(" > /tmp/" + catalogName + ".c");
 
         if (!ContainerStatus.isContainerRunning(gccContainerId)) {
             dockerClient.startContainerCmd(gccContainerId).exec();
             }
-
+        //"sh", "-c",
         //System.out.println(dockerClient.listContainersCmd().exec());
-        System.out.println(sourceCode);
+        System.out.println("COMPILE SOURCE CODE"+sourceCode);
+
         ExecCreateCmdResponse execCompileUserCode = dockerClient.execCreateCmd(gccContainerId)
                 .withAttachStdout(true)
                 .withAttachStdin(true)
                 .withAttachStderr(true)
-                .withCmd("sh", "-c", "echo \"" + sourceCode + "\" > /tmp/" + catalogName + ".c && " + compileComand)
+                .withCmd("sh","-c", createFileCommand + "&& " + compileComand)
                 .exec();
         MyResultCallback callbackCompile = new MyResultCallback();
         dockerClient.execStartCmd(execCompileUserCode.getId()).exec(callbackCompile);
@@ -89,7 +91,7 @@ public class DockerPlaygroundGCC {
 
         dockerClient.execStartCmd(execRun.getId()).exec(callbackRun);
         //TODO:Ustawic timeouty dla zadan
-        callbackRun.awaitCompletion(1500,TimeUnit.MILLISECONDS);
+        callbackRun.awaitCompletion(3000,TimeUnit.MILLISECONDS);
         String output = callbackRun.getOutput();
         log.atInfo().log("Runnable output -> \n" + output);
 

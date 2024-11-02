@@ -42,6 +42,10 @@ public class DockerSolutionGCC {
     }
 
     private String addUserSolutionToTaskCatalog(UserSolution userSolution, String taskCatalogName)  {
+
+        //String createFileCommand = "echo  $'".concat(userSolution.getSolutionCode()).concat("'").concat(" > /tmp/" + taskCatalogName +"/" + userSolution.getId() +".c");
+        //TODO:dopasować do testowania zadan ta komendę
+
         ExecCreateCmdResponse addSolutionCodeToCatalog = dockerClient.execCreateCmd(gccContainerId)
                 .withAttachStderr(true)
                 .withAttachStdin(true)
