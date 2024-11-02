@@ -17,7 +17,7 @@ public class CompilationService {
     public String compileUserCode(PlaygroundCode playgroundCode) {
 
         String compilationOutput = switch (playgroundCode.getProgrammingLanguage()) {
-            case "JAVA" -> compileUserCodeJava(playgroundCode);
+            case "PYTHON3" -> compileUserCodePython3(playgroundCode);
             case "C" -> compileUserCodeC(playgroundCode);
             default -> "UNKNOWN LANGUAGE SELECTION";
         };
@@ -25,9 +25,9 @@ public class CompilationService {
         return compilationOutput;
     }
 
-    private String compileUserCodeJava(PlaygroundCode playgroundCode) {
+    private String compileUserCodePython3(PlaygroundCode playgroundCode) {
         //TODO: Java w przyszlosci
-        return "NO JAVA IMPLEMENTATION YET";
+        return "NO PYTHON3 IMPLEMENTATION YET";
     }
 
     private String compileUserCodeC(PlaygroundCode playgroundCode) {

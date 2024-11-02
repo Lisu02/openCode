@@ -50,7 +50,7 @@ public class DockerSolutionGCC {
                 .withAttachStderr(true)
                 .withAttachStdin(true)
                 .withAttachStdout(true)
-                .withCmd("sh","-c"," echo \"" + userSolution.getSolutionCode() + "\" > /tmp/" + taskCatalogName + "/" + userSolution.getId() + ".c")
+                .withCmd("sh","-c"," printf '%s' '" + userSolution.getSolutionCode() + "' > /tmp/" + taskCatalogName + "/" + userSolution.getId() + ".c")
                 .exec();
         MyResultCallback addSolutionCodeCallback = new MyResultCallback();
         dockerClient.execStartCmd(addSolutionCodeToCatalog.getId()).exec(addSolutionCodeCallback);
@@ -71,7 +71,7 @@ public class DockerSolutionGCC {
                 .withAttachStderr(true)
                 .withAttachStdin(true)
                 .withAttachStdout(true)
-                .withCmd("sh","-c","gcc -o " + operationPath + "/" + solutionFileName + " " //gcc -o /tmp/1-mnozenie/1
+                .withCmd("sh","-c","gcc -O2 -o " + operationPath + "/" + solutionFileName + " " //gcc -o /tmp/1-mnozenie/1
                         + operationPath + "/" + solutionFileName + ".c" + " " // /tmp/1-mnozenie/mnozenie.c
                         + operationPath + "/" + "test.c"  // /tmp/1-mnozenie/test.c
                 )

@@ -42,7 +42,7 @@ public class DockerPlaygroundGCC {
         String sourceCode = playgroundCode.getCode();
         String catalogName = playgroundCode.getId().toString();
 
-        String compileComand = "gcc -o /tmp/" + catalogName + " /tmp/" + catalogName + ".c";
+        String compileComand = "gcc -O2 -o /tmp/" + catalogName + " /tmp/" + catalogName + ".c";
 
         String createFileCommand = "printf '%s' '".concat(sourceCode).concat("'").concat(" > /tmp/" + catalogName + ".c");
 
