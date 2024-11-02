@@ -2,21 +2,25 @@ package com.example.openCode.CompilationModule.Service;
 
 import com.example.openCode.CompilationModule.Model.PlaygroundCode;
 import com.example.openCode.CompilationModule.Service.DockerHandler.GCC.DockerPlaygroundGCC;
+import com.example.openCode.CompilationModule.Service.DockerHandler.PYTHON3.DockerPlaygroundPython3;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PlaygroundService {
 
     private DockerPlaygroundGCC dockerPlaygroundGCC;
+    private DockerPlaygroundPython3 dockerPlaygroundPython3;
 
-    public PlaygroundService(DockerPlaygroundGCC dockerPlaygroundGCC) {
+    public PlaygroundService(DockerPlaygroundGCC dockerPlaygroundGCC
+            , DockerPlaygroundPython3 dockerPlaygroundPython3) {
         this.dockerPlaygroundGCC = dockerPlaygroundGCC;
+        this.dockerPlaygroundPython3 = dockerPlaygroundPython3;
     }
 
 
     public String compilePlaygroundCode(PlaygroundCode playgroundCode) {
         String compilationOutput = switch (playgroundCode.getProgrammingLanguage()) {
-            case "JAVA" -> compileUserCodeJava(playgroundCode);
+            case "PYTHON3" -> compileUserCodePython3(playgroundCode);
             case "C" -> compileUserCodeC(playgroundCode);
             default -> "UNKNOWN LANGUAGE SELECTION";
         };
@@ -24,9 +28,9 @@ public class PlaygroundService {
         return compilationOutput;
     }
 
-    private String compileUserCodeJava(PlaygroundCode playgroundCode) {
-        //TODO: Java w przyszlosci
-        return "NO JAVA IMPLEMENTATION YET";
+    private String compileUserCodePython3(PlaygroundCode playgroundCode) {
+
+        return dockerPlaygroundPython3.compile(playgroundCode);
     }
 
 

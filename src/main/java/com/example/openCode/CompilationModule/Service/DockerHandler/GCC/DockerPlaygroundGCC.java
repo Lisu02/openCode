@@ -34,7 +34,6 @@ public class DockerPlaygroundGCC {
 
 
 
-
     //-----------OpenCode Playground------------
 
     public String compile(PlaygroundCode playgroundCode) {
@@ -42,7 +41,7 @@ public class DockerPlaygroundGCC {
         String sourceCode = playgroundCode.getCode();
         String catalogName = playgroundCode.getId().toString();
 
-        String compileComand = "gcc -O2 -o /tmp/" + catalogName + " /tmp/" + catalogName + ".c";
+        String compileCommand = "gcc -O2 -o /tmp/" + catalogName + " /tmp/" + catalogName + ".c";
 
         String createFileCommand = "printf '%s' '".concat(sourceCode).concat("'").concat(" > /tmp/" + catalogName + ".c");
 
@@ -57,7 +56,7 @@ public class DockerPlaygroundGCC {
                 .withAttachStdout(true)
                 .withAttachStdin(true)
                 .withAttachStderr(true)
-                .withCmd("sh","-c", createFileCommand + "&& " + compileComand)
+                .withCmd("sh","-c", createFileCommand + "&& " + compileCommand)
                 .exec();
         MyResultCallback callbackCompile = new MyResultCallback();
         dockerClient.execStartCmd(execCompileUserCode.getId()).exec(callbackCompile);

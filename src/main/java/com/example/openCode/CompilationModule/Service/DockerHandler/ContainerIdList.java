@@ -7,4 +7,7 @@ public class ContainerIdList {
     @Getter
     private static String gccContainerId = DockerConfiguration.getDockerContainerGCC();
 
+    @Getter
+    private static String python3ContainerId = DockerConfiguration.getDockerContainerPython3();
+
 }

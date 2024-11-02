@@ -18,3 +18,8 @@ services:
     container_name: openCode-GccCompiler
     tty: true
     init: false
+  python3Interpreter:
+    image: python:3
+    container_name: openCode-pythonInterpreter
+    tty: true
+    init: false

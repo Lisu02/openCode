@@ -30,7 +30,7 @@ public class PlaygroundController {
     @PostMapping("/playgroundCompile")
     @Async
     public CompletableFuture<String> playgroundCompilation(@RequestBody String code) {
-        PlaygroundCode playgroundCode = new PlaygroundCode(incrementCodeID(), "C", code);
+        PlaygroundCode playgroundCode = new PlaygroundCode(incrementCodeID(), "PYTHON3", code);
         System.out.println("------PLAYGROUND CONTROLLER----");
         System.out.println(code);
         return CompletableFuture.completedFuture(playgroundService.compilePlaygroundCode(playgroundCode));

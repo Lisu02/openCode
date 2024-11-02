@@ -48,6 +48,15 @@ public class DockerConfiguration {
         return null;
     }
 
+    public static String getDockerContainerPython3(){
+        for(Container container : dockerClient.listContainersCmd().exec()){
+            if(container.getImage().contains("python")){
+                return container.getId();
+            }
+        }
+        return null;
+    }
+
     //kontener read-only poza katalogiem tmp
 //    dockerClient.createContainerCmd("gcc_container_image")
 //            .withReadonlyRootfs(true) // Ustaw kontener jako tylko do odczytu
