@@ -4,7 +4,6 @@ import com.example.openCode.CompilationModule.Model.PlaygroundCode;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerIdList;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerStatus;
 import com.example.openCode.CompilationModule.Service.DockerHandler.DockerConfiguration;
-import com.example.openCode.CompilationModule.Service.DockerHandler.GCC.DockerPlaygroundGCC;
 import com.example.openCode.CompilationModule.Service.DockerHandler.MyResultCallback;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.ExecCreateCmdResponse;
@@ -17,54 +16,59 @@ public class DockerPlaygroundPython3 {
 
     private static final Logger log = LoggerFactory.getLogger(DockerPlaygroundPython3.class);
     DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
-    String python3ContainerId = ContainerIdList.getGccContainerId();
+    String python3ContainerId = ContainerIdList.getPython3ContainerId();  // ID pythona nie gcc!!
 
 
-    public String compile(PlaygroundCode playgroundCode) {
-
+    public String execute(PlaygroundCode playgroundCode) {
         String sourceCode = playgroundCode.getCode();
-        String catalogName = playgroundCode.getId().toString();
+        String fileName = playgroundCode.getId().toString() + ".py";
+        String filePath = "/tmp/" + fileName;
 
-        String createFileCommand = "printf '%s' '".concat(sourceCode).concat("'").concat(" > /tmp/" + catalogName + ".py");
-        String runCodeCommand = "python " + "/tmp/" + playgroundCode.getId().toString() + ".py";
+        // Komenda do zapisania kodu do pliku w kontenerze
+        String createFileCommand = "printf '%s' '".concat(sourceCode).concat("'").concat(" > /tmp/" + fileName);
 
-        if (!ContainerStatus.isContainerRunning(python3ContainerId)){
+
+        // Uruchamianie kontenera, jeśli jeszcze nie działa
+        if (!ContainerStatus.isContainerRunning(python3ContainerId)) {
             dockerClient.startContainerCmd(python3ContainerId).exec();
         }
-        System.out.println(createFileCommand);
-        ExecCreateCmdResponse execAddFile = dockerClient.execCreateCmd(python3ContainerId)
+
+        // Utworzenie pliku z kodem użytkownika wewnątrz kontenera
+        ExecCreateCmdResponse execCreateFile = dockerClient.execCreateCmd(python3ContainerId)
                 .withAttachStdout(true)
-                .withAttachStdin(true)
                 .withAttachStderr(true)
-                .withCmd("sh","-c",createFileCommand)
+                .withCmd("sh", "-c", createFileCommand)
                 .exec();
-        MyResultCallback callback = new MyResultCallback();
-        dockerClient.execStartCmd(execAddFile.getId()).exec(callback);
-        try{
-            callback.awaitCompletion();
-        }catch (InterruptedException e){
-            e.printStackTrace();
-            log.atError().log("InterruptedException");
+
+        MyResultCallback createFileCallback = new MyResultCallback();
+        dockerClient.execStartCmd(execCreateFile.getId()).exec(createFileCallback);
+
+        try {
+            createFileCallback.awaitCompletion();
+        } catch (InterruptedException e) {
+            log.error("Error while creating file in container", e);
+            return "File creation error";
         }
-        System.out.println(callback.getOutput());
+
+        // Uruchomienie pliku Python z kodem użytkownika
         ExecCreateCmdResponse execRunFile = dockerClient.execCreateCmd(python3ContainerId)
                 .withAttachStdout(true)
-                .withAttachStdin(true)
                 .withAttachStderr(true)
-                .withCmd(runCodeCommand)
+                .withCmd("python", filePath)  // poprawione formatowanie
                 .exec();
-        MyResultCallback runCallback = new MyResultCallback();
-        dockerClient.execStartCmd(execRunFile.getId()).exec(runCallback);
-        try{
-            runCallback.awaitCompletion();
-        }catch (InterruptedException e){
-            e.printStackTrace();
-            log.atError().log("InterruptedException");
+
+        MyResultCallback runFileCallback = new MyResultCallback();
+        dockerClient.execStartCmd(execRunFile.getId()).exec(runFileCallback);
+
+        try {
+            runFileCallback.awaitCompletion();
+        } catch (InterruptedException e) {
+            log.error("Error while running Python code in container", e);
+            return "Execution error";
         }
 
-        log.atInfo().log("Python Run: " + sourceCode);
-        return callback.getOutput() + runCallback.getOutput();
+        log.info("Python Run Output: " + runFileCallback.getOutput());
+        return runFileCallback.getOutput();
     }
-
-
 }
+

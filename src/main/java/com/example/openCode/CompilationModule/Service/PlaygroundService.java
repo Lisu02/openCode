@@ -30,7 +30,7 @@ public class PlaygroundService {
 
     private String compileUserCodePython3(PlaygroundCode playgroundCode) {
 
-        return dockerPlaygroundPython3.compile(playgroundCode);
+        return dockerPlaygroundPython3.execute(playgroundCode);
     }
 
 
