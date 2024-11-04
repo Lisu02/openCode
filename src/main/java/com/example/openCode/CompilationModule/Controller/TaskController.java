@@ -32,8 +32,8 @@ public class TaskController {
         //TODO: POPRAWIĆ ZAPISYWANIE ZŁOŻONYCH TESTÓW PONIEWAŻ FUNKCJA GENERUJACA TESTY ROBI BŁEDY NA BŁEDNYCH DANYCH
         //TODO: POPRAWIĆ BRAKI W BAZIE DANYCH PO DODANIU ZADANIA TESTOWEGO
         LinkedList<FunctionArgument> functionArguments = new LinkedList<>();
-        functionArguments.add(new FunctionArgument(0,ReturnType.INT,"liczba",null));
-        functionArguments.add(new FunctionArgument(1,ReturnType.INT,"mnoznik",null));
+        functionArguments.add(new FunctionArgument(1,ReturnType.INT,"liczba",null));
+        functionArguments.add(new FunctionArgument(2,ReturnType.INT,"mnoznik",null));
 
         LinkedList<TestArgument> testArguments = new LinkedList<>();
         testArguments.add(new TestArgument(1,ReturnType.INT,"4",null));
