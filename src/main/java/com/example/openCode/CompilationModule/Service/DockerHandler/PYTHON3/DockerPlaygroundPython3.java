@@ -18,8 +18,16 @@ public class DockerPlaygroundPython3 {
     DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
     String python3ContainerId = ContainerIdList.getPython3ContainerId();  // ID pythona nie gcc!!
 
+    private void killDockerContainer() {
+        dockerClient.killContainerCmd(python3ContainerId).exec();
+    }
+
 
     public String execute(PlaygroundCode playgroundCode) {
+
+
+
+
         String sourceCode = playgroundCode.getCode();
         String fileName = playgroundCode.getId().toString() + ".py";
         String filePath = "/tmp/" + fileName;
@@ -66,7 +74,7 @@ public class DockerPlaygroundPython3 {
             log.error("Error while running Python code in container", e);
             return "Execution error";
         }
-
+        killDockerContainer();
         log.info("Python Run Output: " + runFileCallback.getOutput());
         return runFileCallback.getOutput();
     }
