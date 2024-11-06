@@ -9,9 +9,12 @@ import com.example.openCode.CompilationModule.Repository.FunctionArgumentReposit
 import com.example.openCode.CompilationModule.Repository.TaskRepository;
 import com.example.openCode.CompilationModule.Repository.TestArgumentRepository;
 import com.example.openCode.CompilationModule.Repository.TestTaskRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +26,8 @@ public class TaskService {
     TestTaskRepository testTaskRepository;
     TestArgumentRepository testArgumentRepository;
     TaskMapper taskMapper;
+
+    private static final Logger log = LoggerFactory.getLogger(TaskService.class);
 
 
     @Autowired
@@ -37,6 +42,25 @@ public class TaskService {
         this.testTaskRepository = testTaskRepository;
         this.testArgumentRepository = testArgumentRepository;
         this.taskMapper = taskMapper;
+    }
+
+    //---------------DOCKER ----------------------
+
+    public static boolean isTaskReadyForCreation(Task task){
+        if(task.getArgumentList() == null || task.getTestList() == null){
+            log.warn("Task: {}is not ready for creation inside a container", task.getId());
+            return false;
+        }
+        Iterator<TestTask> iterator = task.getTestList().iterator();
+        TestTask testTaskTmp;
+        while(iterator.hasNext()){
+            testTaskTmp = iterator.next();
+            if(testTaskTmp.getTestArguments() == null || testTaskTmp.getExpectedValue().isBlank()){
+                log.warn("Task: {}is not ready for creation inside a container", task.getId());
+                return false;
+            }
+        }
+        return true;
     }
 
     //-------------GETTING TASKS-------------

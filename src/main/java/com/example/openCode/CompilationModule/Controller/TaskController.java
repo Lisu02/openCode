@@ -7,6 +7,7 @@ import com.example.openCode.CompilationModule.Model.Task.Task;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
 import com.example.openCode.CompilationModule.Service.DockerHandler.GCC.DockerTaskGCC;
+import com.example.openCode.CompilationModule.Service.DockerHandler.PYTHON3.DockerTaskPython3;
 import com.example.openCode.CompilationModule.Service.Task.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,11 +20,13 @@ public class TaskController {
 
     TaskService taskService;
     DockerTaskGCC dockerTaskGCC;
+    DockerTaskPython3 dockerTaskPython3;
 
     @Autowired
-    public TaskController(TaskService taskService, DockerTaskGCC dockerTaskGCC){
+    public TaskController(TaskService taskService, DockerTaskGCC dockerTaskGCC, DockerTaskPython3 dockerTaskPython3) {
         this.taskService = taskService;
         this.dockerTaskGCC = dockerTaskGCC;
+        this.dockerTaskPython3 = dockerTaskPython3;
     }
 
 
@@ -87,6 +90,7 @@ public class TaskController {
         Task task = taskService.getTaskById(id);
         if(task != null){
             dockerTaskGCC.createTaskInContainer(task);
+            dockerTaskPython3.createTaskInContainer(task);
         }else{
             System.out.println("BRAK TASKA");
         }

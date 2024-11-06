@@ -8,6 +8,7 @@ import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerIdList;
 import com.example.openCode.CompilationModule.Service.DockerHandler.DockerConfiguration;
 import com.example.openCode.CompilationModule.Service.DockerHandler.MyResultCallback;
+import com.example.openCode.CompilationModule.Service.Task.TaskService;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.ExecCreateCmdResponse;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class DockerTaskGCC {
 
 
     public void createTaskInContainer(Task task){
-        if(isTaskReadyForCreation(task)){
+        if(TaskService.isTaskReadyForCreation(task)){
             String catalogName = task.getCatalogName();
             createTaskFiles(task,catalogName);
             StringBuilder testCodeForUser = new StringBuilder();
@@ -267,22 +268,6 @@ public class DockerTaskGCC {
             case CHAR, CHARMATRIX, CHARVECTOR -> "%c";
             case STRING -> "%s";
         };
-    }
-    private boolean isTaskReadyForCreation(Task task){
-        if(task.getArgumentList() == null || task.getTestList() == null){
-            log.warn("Task: {}is not ready for creation inside a GCC container", task.getId());
-            return false;
-        }
-        Iterator<TestTask> iterator = task.getTestList().iterator();
-        TestTask testTaskTmp;
-        while(iterator.hasNext()){
-            testTaskTmp = iterator.next();
-            if(testTaskTmp.getTestArguments() == null || testTaskTmp.getExpectedValue().isBlank()){
-                log.warn("Task: {}is not ready for creation inside a GCC container", task.getId());
-                return false;
-            }
-        }
-        return true;
     }
 
 
