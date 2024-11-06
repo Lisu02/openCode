@@ -7,8 +7,10 @@ import lombok.Data;
 @Builder
 public class UserSolutionDTO {
 
-    private String solutionCode;
     private Long solvingTaskId;
+
+    private String programmingLanguage;
+    private String solutionCode;
 
     //UserSolutionStatistics
     private Long runTime;

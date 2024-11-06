@@ -18,8 +18,8 @@ public class DockerSolutionGCC {
     //TODO:Dokończyć metody compile oraz run oraz poprawić generowanie testów (błąd z jednym enterem + blad z wczytywaniem)
 
     private static final Logger log = LoggerFactory.getLogger(DockerSolutionGCC.class);
-    DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
-    String gccContainerId = ContainerIdList.getGccContainerId();
+    private DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
+    private String gccContainerId = ContainerIdList.getGccContainerId();
 
     public String solveInDocker(UserSolution userSolution, Task task) {
         String taskCatalogName = task.getCatalogName(); // 1-mnozenie id-nazwafunkcji

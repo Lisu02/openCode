@@ -16,6 +16,8 @@ public class UserSolution {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    private String programmingLanguage;
+
     @Column(length =  1024)
     private String solutionCode;
 

@@ -5,6 +5,7 @@ import com.example.openCode.CompilationModule.Model.Task.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerIdList;
 import com.example.openCode.CompilationModule.Service.DockerHandler.DockerConfiguration;
+import com.example.openCode.CompilationModule.Service.DockerHandler.DockerTaskLanguage;
 import com.example.openCode.CompilationModule.Service.DockerHandler.MyResultCallback;
 import com.example.openCode.CompilationModule.Service.Task.TaskService;
 import com.github.dockerjava.api.DockerClient;
@@ -16,11 +17,11 @@ import org.springframework.stereotype.Component;
 import java.util.Iterator;
 
 @Component
-public class DockerTaskPython3 {
+public class DockerTaskPython3 implements DockerTaskLanguage {
 
     private static final Logger log = LoggerFactory.getLogger(DockerTaskPython3.class);
-    DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
-    String python3ContainerId = ContainerIdList.getPython3ContainerId();
+    private DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
+    private String python3ContainerId = ContainerIdList.getPython3ContainerId();
 
     public void createTaskInContainer(Task task){
         if(TaskService.isTaskReadyForCreation(task) && createDirectoryForTask(task)){
@@ -51,6 +52,11 @@ public class DockerTaskPython3 {
             log.info("Creating task in Python3 ->{}", createTaskCallback.getOutput());
         }
     }
+
+    public Boolean isTaskCreatedInDockerContainer(Task task){
+        return true; //todo: dokończyć pod pythona3
+    }
+
 
     private boolean createDirectoryForTask(Task task){
         ExecCreateCmdResponse execCreateDirectory = dockerClient.execCreateCmd(python3ContainerId)

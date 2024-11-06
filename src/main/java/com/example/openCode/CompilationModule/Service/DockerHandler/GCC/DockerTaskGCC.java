@@ -7,6 +7,7 @@ import com.example.openCode.CompilationModule.Model.Task.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerIdList;
 import com.example.openCode.CompilationModule.Service.DockerHandler.DockerConfiguration;
+import com.example.openCode.CompilationModule.Service.DockerHandler.DockerTaskLanguage;
 import com.example.openCode.CompilationModule.Service.DockerHandler.MyResultCallback;
 import com.example.openCode.CompilationModule.Service.Task.TaskService;
 import com.github.dockerjava.api.DockerClient;
@@ -18,14 +19,14 @@ import org.springframework.stereotype.Component;
 import java.util.Iterator;
 
 @Component
-public class DockerTaskGCC {
+public class DockerTaskGCC implements DockerTaskLanguage {
 
     //This class role is to create code tasks inside a docker container that can
     //be run to check if the solution of the user is correct
 
     private static final Logger log = LoggerFactory.getLogger(DockerTaskGCC.class);
-    DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
-    String gccContainerId = ContainerIdList.getGccContainerId();
+    private DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
+    private String gccContainerId = ContainerIdList.getGccContainerId();
 
 
     public void createTaskInContainer(Task task){
@@ -59,7 +60,7 @@ public class DockerTaskGCC {
     }
 
 
-    public boolean isTaskCreatedInDockerContainer(Task task){
+    public Boolean isTaskCreatedInDockerContainer(Task task){
         String catalogName = task.getId() + "-" + task.getFunctionName();
         String checkCmd = "[ -d tmp/" + catalogName + " ] && " +
                 "[ -f tmp/" + catalogName + "/test.c ] && " +

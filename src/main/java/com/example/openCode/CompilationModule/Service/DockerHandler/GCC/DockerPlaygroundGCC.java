@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 public class DockerPlaygroundGCC {
 
     private static final Logger log = LoggerFactory.getLogger(DockerPlaygroundGCC.class);
-    DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
-    String gccContainerId = ContainerIdList.getGccContainerId();
+    private DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
+    private String gccContainerId = ContainerIdList.getGccContainerId();
 
     //private String compileComand = "gcc -o /tmp/hello /tmp/hello.c 2>&1 >/tmp/compile_output.txt";
 

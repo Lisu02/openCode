@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 public class DockerPlaygroundPython3 {
 
     private static final Logger log = LoggerFactory.getLogger(DockerPlaygroundPython3.class);
-    DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
-    String python3ContainerId = ContainerIdList.getPython3ContainerId();  // ID pythona nie gcc!!
+    private DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
+    private String python3ContainerId = ContainerIdList.getPython3ContainerId();  // ID pythona nie gcc!!
 
     private void killDockerContainer() {
         dockerClient.killContainerCmd(python3ContainerId).exec();
