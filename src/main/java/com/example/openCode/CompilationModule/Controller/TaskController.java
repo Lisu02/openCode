@@ -1,6 +1,7 @@
 package com.example.openCode.CompilationModule.Controller;
 
 import com.example.openCode.CompilationModule.DTO.TaskDTO;
+import com.example.openCode.CompilationModule.DTO.TaskSmallDTO;
 import com.example.openCode.CompilationModule.Model.Task.ReturnType;
 import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.Task;
@@ -12,6 +13,7 @@ import com.example.openCode.CompilationModule.Service.Task.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -78,6 +80,22 @@ public class TaskController {
     @GetMapping("/v1/task")
     public List<TaskDTO> getAllTasks(){
         return taskService.getAllTasksDTO();
+    }
+
+    @GetMapping("/v1/taskId")
+    public List<TaskSmallDTO> getAllTasksId(){
+        Iterator<Task> taskIterator =  taskService.getAllTasks().iterator();
+        List<TaskSmallDTO> taskList = new LinkedList<>();
+        while(taskIterator.hasNext()){
+            Task task = taskIterator.next();
+            TaskSmallDTO taskSmallDTO = TaskSmallDTO.builder()
+                    .taskId(task.getId())
+                    .returnType(String.valueOf(task.getReturnType()))
+                    .functionName(task.getFunctionName())
+                    .build();
+            taskList.add(taskSmallDTO);
+        }
+        return taskList;
     }
 
     @GetMapping("/v1/task/{id}")

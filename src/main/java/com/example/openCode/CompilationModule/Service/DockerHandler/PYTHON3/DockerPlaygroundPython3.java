@@ -74,7 +74,7 @@ public class DockerPlaygroundPython3 {
             log.error("Error while running Python code in container", e);
             return "Execution error";
         }
-        killDockerContainer();
+        //killDockerContainer();
         log.info("Python Run Output: " + runFileCallback.getOutput());
         return runFileCallback.getOutput();
     }
