@@ -1,5 +1,6 @@
 package com.example.openCode.CompilationModule.Controller;
 
+import com.example.openCode.CompilationModule.DTO.PlaygroundDTO;
 import com.example.openCode.CompilationModule.Model.PlaygroundCode;
 import com.example.openCode.CompilationModule.Service.PlaygroundService;
 
@@ -35,6 +36,18 @@ public class PlaygroundController {
         System.out.println(code);
         return CompletableFuture.completedFuture(playgroundService.compilePlaygroundCode(playgroundCode));
     }
+
+    @PostMapping("/playgroundCompile/v2")
+    @Async
+    public CompletableFuture<String> playgroundCompilation(@RequestBody PlaygroundDTO playgroundDTO) {
+        PlaygroundCode playgroundCode = new PlaygroundCode(incrementCodeID(),
+                playgroundDTO.getProgrammingLanguage().toUpperCase(),
+                playgroundDTO.getCode());
+        System.out.println("------PLAYGROUND CONTROLLER----");
+        System.out.println(playgroundCode.getCode());
+        return CompletableFuture.completedFuture(playgroundService.compilePlaygroundCode(playgroundCode));
+    }
+
 
 
     private synchronized long incrementCodeID() {
