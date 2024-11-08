@@ -173,7 +173,7 @@ public class DockerTaskGCC implements DockerTaskLanguage {
     }
     private void generateTestFunctionToDocker(Task task, StringBuilder builder) {
         builder.append("void test(");
-        builder.append(task.getReturnType().toString().toLowerCase());
+        builder.append(getTypeToString(task.getReturnType())); // return type
         builder.append(" (*operation)(");
         Iterator<FunctionArgument> iterator = task.getArgumentList().iterator();
         FunctionArgument functionArgumentTMP;
@@ -263,11 +263,37 @@ public class DockerTaskGCC implements DockerTaskLanguage {
 
     private String printfSpecifiers(ReturnType returnType){
         return switch (returnType){
-            case INT, INTMATRIX, INTVECTOR, BOOLEAN -> "%d";
+            case INT, INTVECTOR, BOOLEAN -> "%d";
             case FLOAT -> "%f";
             case DOUBLE -> "%e";
-            case CHAR, CHARMATRIX, CHARVECTOR -> "%c";
+            case CHAR, CHARVECTOR -> "%c";
             case STRING -> "%s";
+        };
+    }
+
+    private String getTypeToString(ReturnType returnType){
+        return switch (returnType){
+            case INT -> "int";
+            case FLOAT -> "float";
+            case DOUBLE -> "double";
+            case BOOLEAN -> "bool";
+            case CHAR -> "char";
+            case STRING -> "char*";
+            case INTVECTOR -> "int*";
+            case CHARVECTOR -> "char*";
+        };
+    }
+
+    private String getTypeToTestFunction(ReturnType returnType){
+        return switch (returnType){
+            case INT -> "int";
+            case FLOAT -> "float";
+            case DOUBLE -> "double";
+            case BOOLEAN -> "bool";
+            case CHAR -> "char";
+            case STRING -> "(char[])";
+            case INTVECTOR -> "(int[])";
+            case CHARVECTOR -> "(char[])";
         };
     }
 

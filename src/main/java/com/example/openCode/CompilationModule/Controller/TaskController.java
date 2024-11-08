@@ -77,6 +77,53 @@ public class TaskController {
         }
     }
 
+    @GetMapping("/v1/addTasksTest222")
+    public void addTaskForTestingPurposes2() {
+        LinkedList<FunctionArgument> functionArguments = new LinkedList<>();
+        functionArguments.add(new FunctionArgument(1, ReturnType.BOOLEAN, "czyDodawacLitere", null));
+        functionArguments.add(new FunctionArgument(2, ReturnType.CHAR, "litera", null));
+        functionArguments.add(new FunctionArgument(3, ReturnType.DOUBLE, "numer1", null));
+        functionArguments.add(new FunctionArgument(4, ReturnType.DOUBLE, "numer2", null));
+
+        LinkedList<TestArgument> testArguments = new LinkedList<>();
+        testArguments.add(new TestArgument(1, ReturnType.BOOLEAN, "true", null));
+        testArguments.add(new TestArgument(2, ReturnType.CHAR, "A", null));
+        testArguments.add(new TestArgument(3, ReturnType.DOUBLE, "12.5", null));
+        testArguments.add(new TestArgument(4, ReturnType.DOUBLE, "7.5", null));
+
+        LinkedList<TestArgument> testArguments2 = new LinkedList<>();
+        testArguments2.add(new TestArgument(1, ReturnType.BOOLEAN, "false", null));
+        testArguments2.add(new TestArgument(2, ReturnType.CHAR, "X", null));
+        testArguments2.add(new TestArgument(3, ReturnType.DOUBLE, "80.0", null));
+        testArguments2.add(new TestArgument(4, ReturnType.DOUBLE, "20.0", null));
+
+        List<TestTask> testTaskList = new LinkedList<>();
+        testTaskList.add(new TestTask(0, null, testArguments, "A20.0"));
+        testTaskList.add(new TestTask(0, null, testArguments2, "100.0"));
+
+        testArguments.forEach(it -> it.setTestTask(testTaskList.get(0)));
+        testArguments2.forEach(it -> it.setTestTask(testTaskList.get(1)));
+
+        Task task = Task.builder()
+                .returnType(ReturnType.STRING)
+                .functionName("LiteryLiczby")
+                .argumentList(functionArguments)
+                .testList(testTaskList)
+                .build();
+
+        // Set the Task reference in each FunctionArgument
+        functionArguments.forEach(arg -> arg.setTask(task));
+
+        testTaskList.forEach(it -> it.setTask(task));
+
+        taskService.saveTask(task);
+        Task tmp = taskService.getTaskById(task.getId());
+        if(tmp != null){
+            generateTask(tmp.getId());
+        }
+    }
+
+
     @GetMapping("/v1/task")
     public List<TaskDTO> getAllTasks(){
         return taskService.getAllTasksDTO();
@@ -115,16 +162,16 @@ public class TaskController {
     }
 
 
-    @PostMapping("v1/task/resolve/{id}")
-    public String resolveTask(@PathVariable("id") long id,String code){
-        Task task = taskService.getTaskById(id);
-        if(task != null){
-            //return taskService.solveTask(code);
-            return null;
-        }else{
-            return "TASK NOT FOUND";
-        }
-    }
+//    @PostMapping("v1/task/resolve/{id}")
+//    public String resolveTask(@PathVariable("id") long id,String code){
+//        Task task = taskService.getTaskById(id);
+//        if(task != null){
+//            //return taskService.solveTask(code);
+//            return null;
+//        }else{
+//            return "TASK NOT FOUND";
+//        }
+//    }
 
     @PostMapping("/v1/task")
     public void putTask(@RequestBody TaskDTO taskDTO){
