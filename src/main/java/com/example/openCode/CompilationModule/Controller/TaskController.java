@@ -85,13 +85,13 @@ public class TaskController {
     public void addTaskForTestingPurposes2() {
         System.out.println("addTaskForTestingPurposes2?");
         LinkedList<FunctionArgument> functionArguments = new LinkedList<>();
-        functionArguments.add(new FunctionArgument(0, ReturnType.STRING, "czyDodawacLitere", null));
+        functionArguments.add(new FunctionArgument(0, ReturnType.BOOLEAN, "czyDodawacLitere", null));
         functionArguments.add(new FunctionArgument(0, ReturnType.CHAR, "litera", null));
         functionArguments.add(new FunctionArgument(0, ReturnType.DOUBLE, "numer1", null));
         functionArguments.add(new FunctionArgument(0, ReturnType.DOUBLE, "numer2", null));
 
         LinkedList<TestArgument> testArguments = new LinkedList<>();
-        testArguments.add(new TestArgument(0, ReturnType.STRING, "true", null));
+        testArguments.add(new TestArgument(0, ReturnType.BOOLEAN, "true", null));
         testArguments.add(new TestArgument(0, ReturnType.CHAR, "A", null));
         testArguments.add(new TestArgument(0, ReturnType.DOUBLE, "12.5", null));
         testArguments.add(new TestArgument(0, ReturnType.DOUBLE, "7.5", null));
@@ -133,7 +133,7 @@ public class TaskController {
         }
     }
 
-    @GetMapping("v1/addTasksTest333")
+    @GetMapping("/v1/addTasksTest333")
     public void addTasksForTestingPurposes3(){
         LinkedList<FunctionArgument> functionArguments = new LinkedList<>();
         functionArguments.add(new FunctionArgument(0, ReturnType.INTVECTOR, "array1", null));
@@ -169,6 +169,65 @@ public class TaskController {
         }
     }
 
+    @GetMapping("/v1/addTasksTest444")
+    public String addTasksForTestingPurposes4(){
+        System.out.println("ADD TASKS FOR TESTING 4");
+        LinkedList<FunctionArgument> functionArguments = new LinkedList<>();
+        functionArguments.add(new FunctionArgument(0, ReturnType.INT, "x", null));
+
+        LinkedList<TestArgument> testArguments = new LinkedList<>();
+        testArguments.add(new TestArgument(0, ReturnType.INT, "153", null));
+
+        LinkedList<TestArgument> testArguments2 = new LinkedList<>();
+        testArguments.add(new TestArgument(0, ReturnType.INT, "121", null));
+
+        LinkedList<TestArgument> testArguments3 = new LinkedList<>();
+        testArguments.add(new TestArgument(0, ReturnType.INT, "333", null));
+
+        LinkedList<TestArgument> testArguments4 = new LinkedList<>();
+        testArguments.add(new TestArgument(0, ReturnType.INT, "1942", null));
+
+        LinkedList<TestArgument> testArguments5 = new LinkedList<>();
+        testArguments.add(new TestArgument(0, ReturnType.INT, "129821", null));
+
+
+        List<TestTask> testTaskList = new LinkedList<>();
+        testTaskList.add(new TestTask(0, null, testArguments, "false"));
+        testTaskList.add(new TestTask(0, null, testArguments2, "true"));
+        testTaskList.add(new TestTask(0, null, testArguments3, "true"));
+        testTaskList.add(new TestTask(0, null, testArguments4, "false"));
+        testTaskList.add(new TestTask(0, null, testArguments5, "false"));
+
+        testArguments.forEach(it -> it.setTestTask(testTaskList.get(0)));
+        testArguments2.forEach(it -> it.setTestTask(testTaskList.get(1)));
+        testArguments3.forEach(it -> it.setTestTask(testTaskList.get(2)));
+        testArguments4.forEach(it -> it.setTestTask(testTaskList.get(3)));
+        testArguments5.forEach(it -> it.setTestTask(testTaskList.get(4)));
+
+        Task task = Task.builder()
+                .returnType(ReturnType.INT)
+                .functionName("PalindromNumber")
+                .argumentList(functionArguments)
+                .testList(testTaskList)
+                .build();
+
+        functionArguments.forEach(arg -> arg.setTask(task));
+
+        testTaskList.forEach(it -> it.setTask(task));
+
+        taskService.saveTask(task);
+        Task tmp = taskService.getTaskById(task.getId());
+        System.out.println(tmp);
+        if(tmp != null){
+            generateTask(tmp.getId());
+            return "OK";
+        }else{
+            log.warn("TMP WHEN ADDING IS NULL");
+        }
+
+        return "NOT OK";
+    }
+
 
     @GetMapping("/v1/task")
     public List<TaskDTO> getAllTasks(){
@@ -201,7 +260,7 @@ public class TaskController {
         Task task = taskService.getTaskById(id);
         if(task != null){
             dockerTaskGCC.createTaskInContainer(task);
-            dockerTaskPython3.createTaskInContainer(task);
+            //dockerTaskPython3.createTaskInContainer(task);
         }else{
             log.warn("TASK NOT FOUND IN DATABASE");
             //System.out.println("BRAK TASKA");

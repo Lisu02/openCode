@@ -25,9 +25,6 @@ public class DockerPlaygroundPython3 {
 
     public String execute(PlaygroundCode playgroundCode) {
 
-
-
-
         String sourceCode = playgroundCode.getCode();
         String fileName = playgroundCode.getId().toString() + ".py";
         String filePath = "/tmp/" + fileName;

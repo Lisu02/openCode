@@ -98,7 +98,8 @@ public class TaskService {
     }
 
     public void saveTask(Task task){
-        taskRepository.save(task);
+        Task taskSave = taskRepository.save(task);
+        if(task != taskSave) log.warn("task != taskSave");
         saveFunctionArgument(task.getArgumentList());
         saveTestTask(task.getTestList());
     }
@@ -107,7 +108,10 @@ public class TaskService {
         functionArgumentRepository.save(functionArgument);
     }
     public void saveFunctionArgument(List<FunctionArgument> functionArgumentList){
-        functionArgumentRepository.saveAll(functionArgumentList);
+        List<FunctionArgument> functionArgumentListSave = functionArgumentRepository.saveAll(functionArgumentList);
+        if(!functionArgumentList.equals(functionArgumentListSave)){
+            log.warn("functionArgumentList != functionArgumentListSave");
+        }
     }
 
     public void saveTestTask(TestTask testTask){
@@ -120,7 +124,8 @@ public class TaskService {
     }
     public void saveTestTask(List<TestTask> testTaskList){
         if(testTaskList != null && !testTaskList.isEmpty()){
-            testTaskRepository.saveAll(testTaskList);
+            List<TestTask> testTasksSave = testTaskRepository.saveAll(testTaskList);
+            if(!testTaskList.equals(testTasksSave)){log.warn("testTaskList != testTaskListSave");}
             for (TestTask testTask : testTaskList) {
                 saveTestArgument(testTask.getTestArguments());  //Zapisywanie wszystkich argumentów w TestTask
             }
@@ -134,7 +139,8 @@ public class TaskService {
     }
     public void saveTestArgument(List<TestArgument> testArgumentList){
         if(testArgumentList != null && !testArgumentList.isEmpty()){
-            testArgumentRepository.saveAll(testArgumentList);
+            List<TestArgument> testArgumentsSave = testArgumentRepository.saveAll(testArgumentList);
+            if(testArgumentList.equals(testArgumentsSave)){log.warn("testArgumentList != testArgumentListSave");}
         }
     }
 
