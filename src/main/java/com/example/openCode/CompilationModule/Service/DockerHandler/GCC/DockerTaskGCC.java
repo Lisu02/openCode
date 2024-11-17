@@ -133,7 +133,7 @@ public class DockerTaskGCC implements DockerTaskLanguage {
 
             if(isTypeAnArrayType(functionArgumentTMP.getType())){ //Adding size to arrayTypes
                 builder.append(", ");
-                builder.append("int* size").append(functionArgumentTMP.getName());
+                builder.append("int size").append(functionArgumentTMP.getName());
                 builder.append(" ");
             }
 
@@ -206,7 +206,7 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             functionArgumentTMP = iterator.next();
             builder.append(getTypeToString(functionArgumentTMP.getType()));
             if(isTypeAnArrayType(functionArgumentTMP.getType())){
-                builder.append(", ").append("int*"); //size[NazwaZmiennej]
+                builder.append(", ").append("int"); //size[NazwaZmiennej]
             }
             if (iterator.hasNext()) {
                 builder.append(",");
@@ -225,12 +225,12 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             builder.append(functionArgumentTMP.getName());
             builder.append(","); //Lack of hasNext check is on purpose
             if(isTypeAnArrayType(functionArgumentTMP.getType())){
-                builder.append("int* size").append(functionArgumentTMP.getName());
+                builder.append("int size").append(functionArgumentTMP.getName());
                 builder.append(" ,");
             }
         }
         if(isTaskArrayType(task)){
-            builder.append("int* sizeExpected, ");
+            builder.append("int sizeExpected, ");
         }
         builder.append(getTypeToString(task.getReturnType()));
         builder.append(" expected,int* overall,int* failed){\n"); //space is necessary
@@ -287,8 +287,8 @@ public class DockerTaskGCC implements DockerTaskLanguage {
     //TODO: Poprawić porównywanie tablic sizeof nie działa zostawić na samym memcmp bez przypadku za dużej tablicy użytkownika
     private static void generateTestResultComparisone(Task task, StringBuilder builder) {
         if (task.getReturnType() == ReturnType.INTVECTOR) {
-            //mozna wykorzystać biblioteke string.h do tablic moze 2 wymiarowe tez?
-            builder.append("\tif(memcmp(expected,result,(size_t) sizeExpected) == 0 && *sizeExpected == sizeResult) {\n"); //todo: sizeof do wyrzucenia
+            //mozna wykorzystać biblioteke string.h do tablic moze 2 wymiarowe tez?abc
+            builder.append("\tif(memcmp(expected,result, sizeExpected * sizeof(int)) == 0 && sizeExpected == sizeResult) {\n");
         } else if (task.getReturnType() == ReturnType.STRING || task.getReturnType() == ReturnType.CHARVECTOR) {
             builder.append("\tif(strcmp(expected,result) == 0 && sizeExpected == sizeResult) { \n");
         } else {
@@ -307,7 +307,7 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             builder.append("\t\tprintf(\"] \");\n");
 
             builder.append("\t\tprintf(\"expected: [\");\n");
-            builder.append("\t\t\tfor(int i = 0 ; i < *sizeExpected; i++){\n");
+            builder.append("\t\t\tfor(int i = 0 ; i < sizeExpected; i++){\n");
             builder.append("\t\t\t\tprintf(\"%d,\",expected[i]);\n");
             builder.append("\t\t\t}\n");
             builder.append("\t\tprintf(\"]) \");\n");
@@ -347,7 +347,7 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             builder.append("\t\t\t}\n");
             builder.append("\t\tprintf(\"] \");\n");
             builder.append("\t\tprintf(\"expected: [\");\n");
-            builder.append("\t\t\tfor(int i = 0 ; i < *sizeExpected; i++){\n");
+            builder.append("\t\t\tfor(int i = 0 ; i < sizeExpected; i++){\n");
             builder.append("\t\t\t\tprintf(\"%d,\",expected[i]);\n");
             builder.append("\t\t\t}\n");
             builder.append("\t\tprintf(\"]) \");\n");
@@ -422,10 +422,10 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             builder.append(testTaskTMP.getExpectedValue());
             builder.append("'\\''");
         } else if (testTaskTMP.getTask().getReturnType() == ReturnType.INTVECTOR) {
-            builder.append("(int*) ").append(testTaskTMP.getSize()).append(", ");
+            builder.append("(int) ").append(testTaskTMP.getSize()).append(", ");
             builder.append("(int[]) {").append(testTaskTMP.getExpectedValue()).append("}");
         } else if (testTaskTMP.getTask().getReturnType() == ReturnType.CHARVECTOR) {
-            builder.append("(int*) ").append(testTaskTMP.getSize()).append(", ");
+            builder.append("(int) ").append(testTaskTMP.getSize()).append(", ");
             builder.append("(char[]) {").append(testTaskTMP.getExpectedValue()).append("}");
         } else {
             builder.append(testTaskTMP.getExpectedValue());
@@ -439,10 +439,10 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             builder.append("'\\''").append(testArgument.getArgument()).append("'\\''");
         } else if (testArgument.getType() == (ReturnType.INTVECTOR)) {
             builder.append("(int[]) {").append(testArgument.getArgument()).append("} ");
-            builder.append(",(int*) ").append(testArgument.getSize());
+            builder.append(",(int) ").append(testArgument.getSize());
         } else if (testArgument.getType() == ReturnType.CHARVECTOR || testArgument.getType() == ReturnType.STRING) {
             builder.append("(char[]) {").append(testArgument.getArgument()).append("} ");
-            builder.append(",(int*) ").append(testArgument.getSize());
+            builder.append(",(int) ").append(testArgument.getSize());
         } else {
             builder.append(testArgument.getArgument());
         }
