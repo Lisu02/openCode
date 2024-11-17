@@ -170,27 +170,30 @@ public class TaskController {
     }
 
     @GetMapping("/v1/addTasksTest444")
-    public String addTasksForTestingPurposes4(){
+    public String addTasksForTestingPurposes4() {
         System.out.println("ADD TASKS FOR TESTING 4");
+
+        // Argumenty funkcji
         LinkedList<FunctionArgument> functionArguments = new LinkedList<>();
         functionArguments.add(new FunctionArgument(0, ReturnType.INT, "x", null));
 
+        // Test Argumenty (dla każdego TestTask osobne listy)
         LinkedList<TestArgument> testArguments = new LinkedList<>();
         testArguments.add(new TestArgument(0, ReturnType.INT, "153", null));
 
         LinkedList<TestArgument> testArguments2 = new LinkedList<>();
-        testArguments.add(new TestArgument(0, ReturnType.INT, "121", null));
+        testArguments2.add(new TestArgument(0, ReturnType.INT, "121", null));
 
         LinkedList<TestArgument> testArguments3 = new LinkedList<>();
-        testArguments.add(new TestArgument(0, ReturnType.INT, "333", null));
+        testArguments3.add(new TestArgument(0, ReturnType.INT, "333", null));
 
         LinkedList<TestArgument> testArguments4 = new LinkedList<>();
-        testArguments.add(new TestArgument(0, ReturnType.INT, "1942", null));
+        testArguments4.add(new TestArgument(0, ReturnType.INT, "1942", null));
 
         LinkedList<TestArgument> testArguments5 = new LinkedList<>();
-        testArguments.add(new TestArgument(0, ReturnType.INT, "129821", null));
+        testArguments5.add(new TestArgument(0, ReturnType.INT, "129821", null));
 
-
+        // Lista TestTask
         List<TestTask> testTaskList = new LinkedList<>();
         testTaskList.add(new TestTask(0, null, testArguments, "false"));
         testTaskList.add(new TestTask(0, null, testArguments2, "true"));
@@ -198,35 +201,40 @@ public class TaskController {
         testTaskList.add(new TestTask(0, null, testArguments4, "false"));
         testTaskList.add(new TestTask(0, null, testArguments5, "false"));
 
+        // Przypisywanie relacji testArgument -> testTask
         testArguments.forEach(it -> it.setTestTask(testTaskList.get(0)));
         testArguments2.forEach(it -> it.setTestTask(testTaskList.get(1)));
         testArguments3.forEach(it -> it.setTestTask(testTaskList.get(2)));
         testArguments4.forEach(it -> it.setTestTask(testTaskList.get(3)));
         testArguments5.forEach(it -> it.setTestTask(testTaskList.get(4)));
 
+        // Tworzenie Task
         Task task = Task.builder()
-                .returnType(ReturnType.INT)
+                .returnType(ReturnType.BOOLEAN)
                 .functionName("PalindromNumber")
                 .argumentList(functionArguments)
                 .testList(testTaskList)
                 .build();
 
+        // Przypisywanie relacji argument -> task i testTask -> task
         functionArguments.forEach(arg -> arg.setTask(task));
-
         testTaskList.forEach(it -> it.setTask(task));
 
+        // Zapis zadania w bazie danych
         taskService.saveTask(task);
         Task tmp = taskService.getTaskById(task.getId());
         System.out.println(tmp);
-        if(tmp != null){
+
+        if (tmp != null) {
             generateTask(tmp.getId());
             return "OK";
-        }else{
+        } else {
             log.warn("TMP WHEN ADDING IS NULL");
         }
 
         return "NOT OK";
     }
+
 
 
     @GetMapping("/v1/task")

@@ -122,6 +122,10 @@ public class DockerTaskGCC implements DockerTaskLanguage {
                     " */\n");
             builder.append("#include <stdlib.h>\n");
         }
+        if(task.getReturnType() == ReturnType.BOOLEAN){
+            builder.append("#include <stdbool.h>\n");
+        }
+
         builder.append(getTypeToString(task.getReturnType())); //RETURN TYPE
         builder.append(" ").append(task.getFunctionName()).append("(");
 
@@ -157,9 +161,8 @@ public class DockerTaskGCC implements DockerTaskLanguage {
         //StringBuilder builder = new StringBuilder();
         //todo: dodac wyciaganie danych z taska zeby za kazdym razem nie uzywac iteratora jakos czytelniej??
         builder.append("#include <stdio.h>\n");
-        builder.append("#include <stdbool.h>\n");
         builder.append("#include <string.h>\n");
-        builder.append("#include <stdlib.h>\n");
+
         generateTaskCodeForUser(task, builder, false);
 
         builder.append("#define OPERATION \"");
@@ -241,7 +244,10 @@ public class DockerTaskGCC implements DockerTaskLanguage {
         FunctionArgument functionArgumentTMP;
 
 
-        builder.append("\tint sizeResult = -1;\n");
+        if(isTaskArrayType(task)){
+            builder.append("\tint sizeResult = -1;\n");
+        }
+
         builder.append("\t");
         builder.append(getTypeToString(task.getReturnType()));
         builder.append(" result = operation(");
