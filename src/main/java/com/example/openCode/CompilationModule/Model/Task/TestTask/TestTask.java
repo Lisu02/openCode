@@ -4,6 +4,7 @@ import com.example.openCode.CompilationModule.Model.Task.Task;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -13,6 +14,15 @@ import java.util.List;
 @Getter
 @Builder
 public class TestTask {
+
+
+    public TestTask(long id, Task task, List<TestArgument> argumentList, String expectedValue) {
+        this.id = id;
+        this.task = task;
+        this.testArguments = argumentList;
+        this.expectedValue = expectedValue;
+        this.size = -1;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,5 +34,9 @@ public class TestTask {
     @OneToMany(mappedBy = "testTask")
     private List<TestArgument> testArguments;
 
+    @Column(name = "expectedValue")
     private String expectedValue;
+
+    @Column(name = "size")
+    private int size;
 }

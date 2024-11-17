@@ -2,6 +2,7 @@ package com.example.openCode.CompilationModule.Service.Task;
 
 import com.example.openCode.CompilationModule.DTO.TaskDTO;
 import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
+import com.example.openCode.CompilationModule.Model.Task.ReturnType;
 import com.example.openCode.CompilationModule.Model.Task.Task;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
@@ -61,6 +62,30 @@ public class TaskService {
             }
         }
         return true;
+    }
+
+    public static boolean isTaskArrayType(Task task){
+        return isTypeAnArrayType(task.getReturnType());
+    }
+
+    public static boolean isTypeAnArrayType(ReturnType returnType){
+        return switch (returnType){
+            case INTVECTOR -> true;
+            case CHARVECTOR -> true;
+            case STRING -> true;
+            default -> false;
+        };
+    }
+
+    public static int getAmountOfArrayType(Task task){
+        List<FunctionArgument> argumentList = task.getArgumentList();
+        int arrayTypeAmount = 0;
+        for(FunctionArgument argument : argumentList){
+            if(isTypeAnArrayType(argument.getType())){
+                arrayTypeAmount++;
+            }
+        }
+        return arrayTypeAmount;
     }
 
     //-------------GETTING TASKS-------------

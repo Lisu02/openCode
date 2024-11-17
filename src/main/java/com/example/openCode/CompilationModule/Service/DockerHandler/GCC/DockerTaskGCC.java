@@ -12,12 +12,17 @@ import com.example.openCode.CompilationModule.Service.DockerHandler.MyResultCall
 import com.example.openCode.CompilationModule.Service.Task.TaskService;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.ExecCreateCmdResponse;
+import com.sun.jdi.connect.Connector;
+import org.bouncycastle.oer.its.etsi102941.FullCtl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.xml.transform.Source;
 import java.util.Iterator;
+
+import static com.example.openCode.CompilationModule.Service.Task.TaskService.isTaskArrayType;
+import static com.example.openCode.CompilationModule.Service.Task.TaskService.isTypeAnArrayType;
 
 @Component
 public class DockerTaskGCC implements DockerTaskLanguage {
@@ -111,19 +116,36 @@ public class DockerTaskGCC implements DockerTaskLanguage {
 
     private void generateTaskCodeForUser(Task task, StringBuilder builder, boolean withBrackets) {
         //StringBuilder builder = new StringBuilder();
+        if(isTaskArrayType(task)){
+            builder.append("/**\n" +
+                    " * Note: The returned array must be malloced, assume caller calls free().\n" +
+                    " */\n");
+            builder.append("#include <stdlib.h>\n");
+        }
         builder.append(getTypeToString(task.getReturnType())); //RETURN TYPE
-        builder.append(" ");
-        builder.append(task.getFunctionName());
-        builder.append("(");
+        builder.append(" ").append(task.getFunctionName()).append("(");
+
         Iterator<FunctionArgument> iterator = task.getArgumentList().iterator();
         FunctionArgument functionArgumentTMP;
         while (iterator.hasNext()) {
             functionArgumentTMP = iterator.next();
             builder.append(getTypeToString(functionArgumentTMP.getType())).append(" ").append(functionArgumentTMP.getName());
+
+            if(isTypeAnArrayType(functionArgumentTMP.getType())){ //Adding size to arrayTypes
+                builder.append(", ");
+                builder.append("int* size").append(functionArgumentTMP.getName());
+                builder.append(" ");
+            }
+
             if (iterator.hasNext()) {
                 builder.append(", ");
             }
         }
+
+        if(isTypeAnArrayType(task.getReturnType())){
+            builder.append(", int* sizeResult");
+        }
+
         if (withBrackets) {
             builder.append(")\n{\n}");
         } else {
@@ -137,6 +159,7 @@ public class DockerTaskGCC implements DockerTaskLanguage {
         builder.append("#include <stdio.h>\n");
         builder.append("#include <stdbool.h>\n");
         builder.append("#include <string.h>\n");
+        builder.append("#include <stdlib.h>\n");
         generateTaskCodeForUser(task, builder, false);
 
         builder.append("#define OPERATION \"");
@@ -182,9 +205,15 @@ public class DockerTaskGCC implements DockerTaskLanguage {
         while (iterator.hasNext()) { // argumenty po operation dla "lambdy" void test(typ (*operation)(brakujaca zawartosc...)
             functionArgumentTMP = iterator.next();
             builder.append(getTypeToString(functionArgumentTMP.getType()));
+            if(isTypeAnArrayType(functionArgumentTMP.getType())){
+                builder.append(", ").append("int*"); //size[NazwaZmiennej]
+            }
             if (iterator.hasNext()) {
                 builder.append(",");
             }
+        }
+        if (isTaskArrayType(task)){
+            builder.append(", ").append("int*"); //sizeResult
         }
 
         iterator = task.getArgumentList().iterator();
@@ -195,6 +224,13 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             builder.append(" ");
             builder.append(functionArgumentTMP.getName());
             builder.append(","); //Lack of hasNext check is on purpose
+            if(isTypeAnArrayType(functionArgumentTMP.getType())){
+                builder.append("int* size").append(functionArgumentTMP.getName());
+                builder.append(" ,");
+            }
+        }
+        if(isTaskArrayType(task)){
+            builder.append("int* sizeExpected, ");
         }
         builder.append(getTypeToString(task.getReturnType()));
         builder.append(" expected,int* overall,int* failed){\n"); //space is necessary
@@ -205,6 +241,7 @@ public class DockerTaskGCC implements DockerTaskLanguage {
         FunctionArgument functionArgumentTMP;
 
 
+        builder.append("\tint sizeResult = -1;\n");
         builder.append("\t");
         builder.append(getTypeToString(task.getReturnType()));
         builder.append(" result = operation(");
@@ -212,67 +249,37 @@ public class DockerTaskGCC implements DockerTaskLanguage {
         while (iterator.hasNext()) {
             functionArgumentTMP = iterator.next();
             builder.append(functionArgumentTMP.getName());
+            if(isTypeAnArrayType(functionArgumentTMP.getType())){
+                builder.append(",");
+                builder.append("size").append(functionArgumentTMP.getName());
+            }
             if (iterator.hasNext()) {
                 builder.append(",");
             }
+        }
+        if(isTypeAnArrayType(task.getReturnType())){
+            builder.append(",&sizeResult");
         }
         builder.append(");\n");
 
         builder.append("\t*overall = *overall + 1;\n");
 
 
-        generateTestResultComparisone(task, builder); //todo:rozgraniczyć sprawdzanie dla znaków i tablic
+        generateTestResultComparisone(task, builder);
 
-
-        //todo: informacje zwrotne uzależnić od zwracanego typu szczególnie dla tablic
-
-        builder.append("\t\tprintf(\"Test passed: %s(");
-        iterator = task.getArgumentList().iterator();
-        while (iterator.hasNext()) {
-            functionArgumentTMP = iterator.next();
-            builder.append(printfSpecifiers(functionArgumentTMP.getType()));
-            if (iterator.hasNext()) {
-                builder.append(", ");
-            }
-        }
-        builder.append(") == ");
-        builder.append(printfSpecifiers(task.getReturnType()));
-        builder.append("\\n\",OPERATION,");
-        iterator = task.getArgumentList().iterator();
-        while (iterator.hasNext()) {
-            functionArgumentTMP = iterator.next();
-            builder.append(functionArgumentTMP.getName());
-            builder.append(",");
-        }
-        builder.append("expected);\n");
+        generateTestResultPassed(task,builder);
 
         builder.append("\t} else {\n");
 
-        builder.append("\t\tprintf(\"Test failed: %s(");
-        iterator = task.getArgumentList().iterator();
-        while (iterator.hasNext()) {
-            functionArgumentTMP = iterator.next();
-            builder.append(printfSpecifiers(functionArgumentTMP.getType()));
-            if (iterator.hasNext()) {
-                builder.append(", ");
-            }
-        }
-        builder.append(") == ");
-        builder.append(printfSpecifiers(task.getReturnType()));
-        builder.append(", got ");
-        builder.append(printfSpecifiers(task.getReturnType()));
-        builder.append(" instead\\n\",OPERATION,");
-        iterator = task.getArgumentList().iterator();
-        while (iterator.hasNext()) {
-            functionArgumentTMP = iterator.next();
-            builder.append(functionArgumentTMP.getName());
-            builder.append(", ");
-        }
-        builder.append("expected, result);\n");
+        generateTestResultFailed(task,builder);
 
         builder.append("\t\t*failed = *failed + 1;\n");
 
         builder.append("\t}\n");
+
+        if(isTaskArrayType(task)){
+            builder.append("\tfree(result);\n");
+        }
 
         builder.append("}\n");
     }
@@ -281,12 +288,99 @@ public class DockerTaskGCC implements DockerTaskLanguage {
     private static void generateTestResultComparisone(Task task, StringBuilder builder) {
         if (task.getReturnType() == ReturnType.INTVECTOR) {
             //mozna wykorzystać biblioteke string.h do tablic moze 2 wymiarowe tez?
-            builder.append("\tif( (sizeof(result) / sizeof(int)) == (sizeof(expected) / sizeof(int)) && memcmp(expected,result,(sizeof(expected) / sizeof(int))) == 0 ) {\n");
+            builder.append("\tif(memcmp(expected,result,(size_t) sizeExpected) == 0 && *sizeExpected == sizeResult) {\n"); //todo: sizeof do wyrzucenia
         } else if (task.getReturnType() == ReturnType.STRING || task.getReturnType() == ReturnType.CHARVECTOR) {
-            builder.append("\tif( (sizeof(result) / sizeof(char)) == (sizeof(expected) / sizeof(char)) && strcmp(expected,result) == 0 ) { \n");
+            builder.append("\tif(strcmp(expected,result) == 0 && sizeExpected == sizeResult) { \n");
         } else {
             builder.append("\tif(result == expected) {\n");
         }
+    }
+
+    private static void generateTestResultPassed(Task task, StringBuilder builder){
+        if(isTaskArrayType(task)){
+            builder.append("\t\tprintf(\"\\nTest passed: %s(\",OPERATION);\n");
+
+            builder.append("\t\tprintf(\"result: [\");\n");
+            builder.append("\t\t\tfor(int i = 0 ; i < sizeResult; i++){\n");
+            builder.append("\t\t\t\tprintf(\"%d,\",result[i]);\n");
+            builder.append("\t\t\t}\n");
+            builder.append("\t\tprintf(\"] \");\n");
+
+            builder.append("\t\tprintf(\"expected: [\");\n");
+            builder.append("\t\t\tfor(int i = 0 ; i < *sizeExpected; i++){\n");
+            builder.append("\t\t\t\tprintf(\"%d,\",expected[i]);\n");
+            builder.append("\t\t\t}\n");
+            builder.append("\t\tprintf(\"]) \");\n");
+
+        }else {
+            Iterator<FunctionArgument> iterator = task.getArgumentList().iterator();
+            FunctionArgument functionArgumentTMP;
+
+            builder.append("\t\tprintf(\"Test passed: %s(");
+            iterator = task.getArgumentList().iterator();
+            while (iterator.hasNext()) {
+                functionArgumentTMP = iterator.next();
+                builder.append(printfSpecifiers(functionArgumentTMP.getType()));
+                if (iterator.hasNext()) {
+                    builder.append(", ");
+                }
+            }
+            builder.append(") == ");
+            builder.append(printfSpecifiers(task.getReturnType()));
+            builder.append("\\n\",OPERATION,");
+            iterator = task.getArgumentList().iterator();
+            while (iterator.hasNext()) {
+                functionArgumentTMP = iterator.next();
+                builder.append(functionArgumentTMP.getName());
+                builder.append(",");
+            }
+            builder.append("expected);\n");
+        }
+    }
+
+    private static void generateTestResultFailed(Task task, StringBuilder builder){
+        if(isTaskArrayType(task)){
+            builder.append("\t\tprintf(\"\\nTest failed: %s(\",OPERATION);\n");
+            builder.append("\t\tprintf(\"result: [\");\n");
+            builder.append("\t\t\tfor(int i = 0 ; i < sizeResult; i++){\n");
+            builder.append("\t\t\t\tprintf(\"%d,\",result[i]);\n");
+            builder.append("\t\t\t}\n");
+            builder.append("\t\tprintf(\"] \");\n");
+            builder.append("\t\tprintf(\"expected: [\");\n");
+            builder.append("\t\t\tfor(int i = 0 ; i < *sizeExpected; i++){\n");
+            builder.append("\t\t\t\tprintf(\"%d,\",expected[i]);\n");
+            builder.append("\t\t\t}\n");
+            builder.append("\t\tprintf(\"]) \");\n");
+        }else {
+            Iterator<FunctionArgument> iterator = task.getArgumentList().iterator();
+            FunctionArgument functionArgumentTMP;
+
+            builder.append("\t\tprintf(\"Test failed: %s(");
+            iterator = task.getArgumentList().iterator();
+            while (iterator.hasNext()) {
+                functionArgumentTMP = iterator.next();
+                builder.append(printfSpecifiers(functionArgumentTMP.getType()));
+                if (iterator.hasNext()) {
+                    builder.append(", ");
+                }
+            }
+            builder.append(") == ");
+            builder.append(printfSpecifiers(task.getReturnType()));
+            builder.append(", got ");
+            builder.append(printfSpecifiers(task.getReturnType()));
+            builder.append(" instead\\n\",OPERATION,");
+            iterator = task.getArgumentList().iterator();
+            while (iterator.hasNext()) {
+                functionArgumentTMP = iterator.next();
+                builder.append(functionArgumentTMP.getName());
+                builder.append(", ");
+            }
+            builder.append("expected, result);\n");
+        }
+    }
+
+    private static void generateTestResultPrintfArray(String data, StringBuilder builder){
+
     }
 
 
@@ -328,8 +422,10 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             builder.append(testTaskTMP.getExpectedValue());
             builder.append("'\\''");
         } else if (testTaskTMP.getTask().getReturnType() == ReturnType.INTVECTOR) {
+            builder.append("(int*) ").append(testTaskTMP.getSize()).append(", ");
             builder.append("(int[]) {").append(testTaskTMP.getExpectedValue()).append("}");
         } else if (testTaskTMP.getTask().getReturnType() == ReturnType.CHARVECTOR) {
+            builder.append("(int*) ").append(testTaskTMP.getSize()).append(", ");
             builder.append("(char[]) {").append(testTaskTMP.getExpectedValue()).append("}");
         } else {
             builder.append(testTaskTMP.getExpectedValue());
@@ -343,8 +439,10 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             builder.append("'\\''").append(testArgument.getArgument()).append("'\\''");
         } else if (testArgument.getType() == (ReturnType.INTVECTOR)) {
             builder.append("(int[]) {").append(testArgument.getArgument()).append("} ");
+            builder.append(",(int*) ").append(testArgument.getSize());
         } else if (testArgument.getType() == ReturnType.CHARVECTOR || testArgument.getType() == ReturnType.STRING) {
             builder.append("(char[]) {").append(testArgument.getArgument()).append("} ");
+            builder.append(",(int*) ").append(testArgument.getSize());
         } else {
             builder.append(testArgument.getArgument());
         }

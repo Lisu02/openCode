@@ -12,6 +12,15 @@ import lombok.*;
 @Builder
 public class TestArgument {
 
+    public TestArgument(long id,ReturnType type,String argument, TestTask testTask) {
+        this.id = id;
+        this.type = type;
+        this.argument = argument;
+        this.testTask = testTask;
+        this.size = -1;
+    }
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -22,6 +31,9 @@ public class TestArgument {
 
     @Column(name = "testArgument")
     private String argument;
+
+    @Column(name = "size")
+    private int size;
 
     @ManyToOne
     private TestTask testTask;

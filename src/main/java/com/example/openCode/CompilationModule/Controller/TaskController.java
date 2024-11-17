@@ -141,11 +141,11 @@ public class TaskController {
 
 
         LinkedList<TestArgument> testArguments = new LinkedList<>();
-        testArguments.add(new TestArgument(0, ReturnType.INTVECTOR, "1,5,10,15", null));
-        testArguments.add(new TestArgument(0, ReturnType.INTVECTOR, "9,0,10,35", null));
+        testArguments.add(new TestArgument(0, ReturnType.INTVECTOR, "1,5,10,15",4, null));
+        testArguments.add(new TestArgument(0, ReturnType.INTVECTOR, "9,0,10,35",4, null));
 
         List<TestTask> testTaskList = new LinkedList<>();
-        testTaskList.add(new TestTask(0, null, testArguments, "10,5,20,50"));
+        testTaskList.add(new TestTask(0, null, testArguments, "10,5,20,50",4));
 
 
         testArguments.forEach(it -> it.setTestTask(testTaskList.get(0)));
