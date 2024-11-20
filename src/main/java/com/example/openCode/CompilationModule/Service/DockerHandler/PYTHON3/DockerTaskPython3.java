@@ -85,7 +85,7 @@ public class DockerTaskPython3 implements DockerTaskLanguage {
         }
     }
 
-    private void generatePythonTestScript(Task task, StringBuilder builder) {
+    private void generatePythonTestScriptOLD(Task task, StringBuilder builder) {
         builder.append("import importlib.util\n");
         builder.append("import sys\n\n");
 
@@ -136,7 +136,8 @@ public class DockerTaskPython3 implements DockerTaskLanguage {
         builder.append("    main(user_file)\n");
     }
 
-    private void generatePythonTestScript222(Task task,StringBuilder builder) {
+    //TODO: 2 RODZAJE ZWRACANIA BŁĘDÓW 1 TO EXIT 2 TO RAISE
+    private void generatePythonTestScript(Task task,StringBuilder builder) {
         builder.append("import importlib.util\n");
         builder.append("import argparse\n\n");
         builder.append("FUNCTION_NAME = \"").append(task.getFunctionName()).append("\"\n\n");
@@ -145,7 +146,7 @@ public class DockerTaskPython3 implements DockerTaskLanguage {
         builder.append("\tspec = importlib.util.spec_from_file_location(\"user_solution\", file_path)\n");
         builder.append("\tuser_module = importlib.util.module_from_spec(spec)\n");
         builder.append("\tspec.loader.exec_module(user_module)\n");
-        builder.append("\t user_module\n\n");
+        builder.append("\treturn user_module\n\n\n");
 
         builder.append("def test(operation");
         for (FunctionArgument functionArgument : task.getArgumentList()) {
@@ -162,10 +163,10 @@ public class DockerTaskPython3 implements DockerTaskLanguage {
         builder.append(")\n");
         builder.append("\t\tif result == expected:\n");
         builder.append("\t\t\toverall[0] += 1\n");
-        builder.append("\t\telse:");
+        builder.append("\t\telse:\n");
         builder.append("\t\t\toverall[0] += 1\n");
         builder.append("\t\t\tfailed[0] += 1\n");
-        builder.append("\t\t\tprint(\"Test failed: {operation.__name__}(");
+        builder.append("\t\t\tprint(f\"Test failed: {operation.__name__}(");
         funArgIterator = task.getArgumentList().iterator();
         while (funArgIterator.hasNext()) {
             builder.append("{").append(funArgIterator.next().getName()).append("}");
@@ -175,7 +176,9 @@ public class DockerTaskPython3 implements DockerTaskLanguage {
         builder.append("\texcept Exception as e:\n");
         builder.append("\t\toverall[0] += 1\n");
         builder.append("\t\tfailed[0] += 1\n");
-        builder.append("\t\tprint(\"Test failed with exception: {e}\")\n");
+        builder.append("\t\tprint(f\"Test failed with exception: {e}\")\n");
+        builder.append("\t\texit()\n\n\n");
+
 
         builder.append("def main():\n");
         builder.append("\tparser = argparse.ArgumentParser()\n");
@@ -186,35 +189,63 @@ public class DockerTaskPython3 implements DockerTaskLanguage {
 
         builder.append("\toperation = getattr(user_module, FUNCTION_NAME)\n\n");
 
+
+        //Lista testów
         builder.append("\toverall = [0]\n");
         builder.append("\tfailed = [0]\n");
         builder.append("\ttest_cases = [\n");
         for(TestTask testTask : task.getTestList()) {
-            Iterator<TestArgument> testArgIterator = testTask.getTestArguments().iterator();
-            while (testArgIterator.hasNext()) {
-                TestArgument testArgument = testArgIterator.next();
-                builder.append("\t\t");
-                //TODO: WYPISAĆ ARGUMENTY ZE WZGLĘDU NA TYP writeProperArgumentForTestCase
-                builder.append("\t\t").append(testArgIterator.next().getArgument());
-                if (testArgIterator.hasNext()) builder.append(", ");
+            builder.append("\t\t(");
+            for(TestArgument testArgument: testTask.getTestArguments()) {
+                writeProperArgument(testArgument.getArgument(), testArgument.getType(),builder);
+                builder.append(", ");
             }
+            writeProperArgument(testTask.getExpectedValue(), task.getReturnType(), builder);
             builder.append("),\n");
         }
         builder.append("\t]\n\n");
 
-        builder.append("");
+        //Wywoływanie funkcji test z argumentami
+        builder.append("\tfor ");//for number, expected in test_cases:
+        for(FunctionArgument functionArgument : task.getArgumentList()) {
+            builder.append(functionArgument.getName()).append(", ");
+        }
+        builder.append("expected in test_cases:\n");
 
+        builder.append("\t\ttest(operation, ");
+        for(FunctionArgument functionArgument : task.getArgumentList()) {
+            builder.append(functionArgument.getName()).append(", ");
+        }
+        builder.append("expected, overall, failed)\n");
 
+        builder.append("\tprint(f\"Overall tests: {overall[0]}\")\n");
+        builder.append("\tprint(f\"Failed tests: {failed[0]}\")\n\n");
+
+        builder.append("if __name__ == \"__main__\":\n");
+        builder.append("\tmain()");
 
     }
 
     private void writeProperArgumentForTestCase(TestArgument testArgument, StringBuilder builder) {
         switch (testArgument.getType()){
+            case INT,DOUBLE,FLOAT -> builder.append(testArgument.getArgument());
             case CHAR -> builder.append("'").append(testArgument.getArgument()).append("'"); // 'A'
             case STRING -> builder.append("\"").append(testArgument.getArgument()).append("\""); // "slowo"
             case INTVECTOR -> builder.append("[").append(testArgument.getArgument()).append("]"); // [1,2,3]
             case CHARVECTOR -> builder.append("[").append(testArgument.getArgument()).append("]"); // jest [a,b,c]
+            case BOOLEAN -> builder.append(testArgument.getArgument().substring(0, 1).toUpperCase());
             //a powinno byc ['a','b','c']?? //todo: sprawdzić w c czy charvector na pewno działa
+        }
+    }
+
+    private void writeProperArgument(String argument, ReturnType returnType, StringBuilder builder) {
+        switch (returnType){
+            case INT,DOUBLE,FLOAT -> builder.append(argument);
+            case CHAR -> builder.append("'").append(argument).append("'"); // 'A'
+            case STRING -> builder.append("\"").append(argument).append("\""); // "slowo"
+            case INTVECTOR -> builder.append("[").append(argument).append("]"); // [1,2,3]
+            case CHARVECTOR -> builder.append("[").append(argument).append("]"); // jest [a,b,c]
+            case BOOLEAN -> builder.append(argument.substring(0, 1).toUpperCase() + argument.substring(1));
         }
     }
 

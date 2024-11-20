@@ -268,7 +268,7 @@ public class TaskController {
         Task task = taskService.getTaskById(id);
         if(task != null){
             dockerTaskGCC.createTaskInContainer(task);
-            //dockerTaskPython3.createTaskInContainer(task);
+            dockerTaskPython3.createTaskInContainer(task);
         }else{
             log.warn("TASK NOT FOUND IN DATABASE");
             //System.out.println("BRAK TASKA");
