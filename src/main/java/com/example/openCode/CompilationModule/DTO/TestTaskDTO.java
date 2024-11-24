@@ -13,4 +13,6 @@ public class TestTaskDTO {
     private Long taskId;
     private List<TestInputArgumentDTO> testInputArgumentDTOList;
     private String expectedValue;
+    private int size;
+
 }
