@@ -112,9 +112,14 @@ public class TaskService {
 
     public Task getTaskById(long id){
         Optional<Task> task = taskRepository.findById(id);
-        if(task.isEmpty()) return null;
-        return task.get();
+        return task.orElse(null);
     }
+
+    public TestTask getTestTaskById(Long testTaskId) {
+        Optional<TestTask> testTask =  testTaskRepository.findById(testTaskId);
+        return testTask.orElse(null);
+    }
+
 
     //-----------SAVING TASK---------------
 
@@ -176,4 +181,5 @@ public class TaskService {
     public void addTaskToDocker(Task task) {
         //Adding a task to a docker with test.c generator
     }
+
 }

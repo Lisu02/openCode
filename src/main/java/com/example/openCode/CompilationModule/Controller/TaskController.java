@@ -1,7 +1,6 @@
 package com.example.openCode.CompilationModule.Controller;
 
-import com.example.openCode.CompilationModule.DTO.TaskDTO;
-import com.example.openCode.CompilationModule.DTO.TaskSmallDTO;
+import com.example.openCode.CompilationModule.DTO.*;
 import com.example.openCode.CompilationModule.Model.Task.ReturnType;
 import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.Task;
@@ -33,6 +32,68 @@ public class TaskController {
         this.taskService = taskService;
         this.dockerTaskGCC = dockerTaskGCC;
         this.dockerTaskPython3 = dockerTaskPython3;
+    }
+
+    @PostMapping("/v1/addTask")
+    public void addTask(@RequestBody TaskDTO taskDTO) {
+
+
+        List<FunctionArgument> funArgList = new LinkedList<>();
+        List<TestTask> testTaskList = new LinkedList<>();
+
+        for (FunctionArgumentDTO funArgDTO : taskDTO.getArgumentList()) {
+            FunctionArgument functionArgument = FunctionArgument.builder()
+                    .name(funArgDTO.getName())
+                    .type(ReturnType.valueOf(funArgDTO.getType()))
+                    .task(null)
+                    .build();
+            funArgList.add(functionArgument);
+        }
+
+        for(TestTaskDTO testTaskDTO : taskDTO.getTestList()) {
+            List<TestArgument> testArgList = new LinkedList<>();
+            for(TestInputArgumentDTO testInputArgumentDTO : testTaskDTO.getTestInputArgumentDTOList()){
+                TestArgument testArgument = TestArgument.builder()
+                        .argument(testInputArgumentDTO.getTestArgument())
+                        .type(ReturnType.valueOf(testInputArgumentDTO.getType()))
+                        .size(testInputArgumentDTO.getSize())
+                        .testTask(null)
+                        .build();
+                testArgList.add(testArgument);
+            }
+
+            TestTask testTask = TestTask.builder()
+                    .expectedValue(testTaskDTO.getExpectedValue())
+                    .size(testTaskDTO.getSize())
+                    .task(null)
+                    .testArguments(testArgList)
+                    .build();
+            testTaskList.add(testTask);
+            testArgList.forEach(it -> it.setTestTask(testTask));
+        }
+
+        //TODO: Sprawdzic czy do listy testow i ich argumentow poprawnie jest wszystko podpiete z id
+
+        Task task = Task.builder()
+                .returnType(ReturnType.valueOf(taskDTO.getReturnType()))
+                .functionName(taskDTO.getFunctionName())
+                .argumentList(funArgList)
+                .testList(testTaskList)
+                .build();
+
+        funArgList.forEach(it -> it.setTask(task));
+        testTaskList.forEach(it -> it.setTask(task));
+
+
+        System.out.println(funArgList);
+        System.out.println(testTaskList);
+        System.out.println(task);
+
+        taskService.saveTask(task);
+        Task tmp = taskService.getTaskById(task.getId());
+        if(tmp != null){
+            generateTask(tmp.getId());
+        }
     }
 
 

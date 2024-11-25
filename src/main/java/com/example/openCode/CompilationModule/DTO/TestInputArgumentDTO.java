@@ -11,4 +11,5 @@ public class TestInputArgumentDTO {
     private String type;
     private String testArgument;
     private Long testTaskId;
+    private int size;
 }
