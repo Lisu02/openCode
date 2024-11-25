@@ -2,6 +2,9 @@ package com.example.openCode.CompilationModule.Service.DockerHandler.PYTHON3;
 
 import com.example.openCode.CompilationModule.Model.Task.Task;
 import com.example.openCode.CompilationModule.Model.UserSolution;
+import com.example.openCode.CompilationModule.Model.UserSolutionStatistics;
+import com.example.openCode.CompilationModule.Repository.UserSolutionRepository;
+import com.example.openCode.CompilationModule.Repository.UserSolutionStatisticsRepository;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerIdList;
 import com.example.openCode.CompilationModule.Service.DockerHandler.DockerConfiguration;
 import com.example.openCode.CompilationModule.Service.DockerHandler.GCC.DockerSolutionGCC;
@@ -10,7 +13,12 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.ExecCreateCmdResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.TimeUnit;
+
+import static com.example.openCode.CompilationModule.Service.DockerHandler.DockerUtils.*;
 
 @Component
 public class DockerSolutionPython3 {
@@ -18,6 +26,14 @@ public class DockerSolutionPython3 {
     private static final Logger log = LoggerFactory.getLogger(DockerSolutionPython3.class);
     private DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
     private String python3ContainerId = ContainerIdList.getPython3ContainerId();
+    private UserSolutionRepository userSolutionRepository;
+    private UserSolutionStatisticsRepository userSolutionStatisticsRepository;
+
+    @Autowired
+    public DockerSolutionPython3(UserSolutionRepository userSolutionRepository, UserSolutionStatisticsRepository userSolutionStatisticsRepository) {
+        this.userSolutionRepository = userSolutionRepository;
+        this.userSolutionStatisticsRepository = userSolutionStatisticsRepository;
+    }
 
     public String solveInDockerPython3(UserSolution userSolution, Task task) {
         addUserSolutionToTaskCatalog(userSolution, task);
@@ -56,19 +72,46 @@ public class DockerSolutionPython3 {
                 .withAttachStderr(true)
                 .withAttachStdin(true)
                 .withAttachStdout(true)
-                .withCmd("sh","-c"," python tmp/" + task.getCatalogName() + "/test.py " + "tmp/" + task.getCatalogName() + "/" + solutionFileName)
+                .withCmd("sh","-c","time -v python3 tmp/" + task.getCatalogName() + "/test.py " + "tmp/" + task.getCatalogName() + "/" + solutionFileName)
                 .exec();
         MyResultCallback runCallback = new MyResultCallback();
 
         dockerClient.execStartCmd(runCommand.getId()).exec(runCallback);
-
+        boolean isTimedOut = false;
         try{
-            runCallback.awaitCompletion();
+            isTimedOut = !runCallback.awaitCompletion(basicTimeoutTime, TimeUnit.MILLISECONDS);
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         log.info("runCode for Python output: {}",runCallback.getOutput());
-        return runCallback.getOutput();
+
+        if(!isTimedOut){
+            String outputTime = getTime(runCallback.getOutput());
+            String outputMemory = getMemory(runCallback.getOutput());
+
+            //STATYSTYKI WYKONANIA ZADANIA
+            UserSolutionStatistics userSolutionStatistics = UserSolutionStatistics.builder()
+                    .runTime(convertStringTimeToLong(outputTime))
+                    .memoryUsage(convertStringMemoryToLong(outputMemory))
+                    .build();
+
+            userSolutionStatistics.setUserSolution(userSolution);
+            userSolution.setUserSolutionStatistics(userSolutionStatistics);
+
+            System.out.println(userSolutionStatistics.getUserSolution());
+            System.out.println(userSolution.getUserSolutionStatistics());
+
+            userSolutionStatisticsRepository.save(userSolutionStatistics);
+            userSolutionRepository.save(userSolution);
+
+            log.info("SOLUTION: Output time -> " + outputTime + " | Memory -> " + outputMemory);
+            return getOnlyCodeOutput(runCallback.getOutput());
+        }
+
+
+        return "Execution error: Python code took too long to execute";
     }
 
 }

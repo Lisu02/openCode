@@ -23,6 +23,6 @@ public class UserSolution {
 
     private Long solvingTaskId;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     UserSolutionStatistics userSolutionStatistics;
 }

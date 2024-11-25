@@ -1,6 +1,7 @@
 package com.example.openCode.CompilationModule.Service.DockerHandler.PYTHON3;
 
 import com.example.openCode.CompilationModule.Model.PlaygroundCode;
+import com.example.openCode.CompilationModule.Model.UserSolutionStatistics;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerIdList;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerStatus;
 import com.example.openCode.CompilationModule.Service.DockerHandler.DockerConfiguration;
@@ -10,6 +11,10 @@ import com.github.dockerjava.api.command.ExecCreateCmdResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.TimeUnit;
+
+import static com.example.openCode.CompilationModule.Service.DockerHandler.DockerUtils.*;
 
 @Component
 public class DockerPlaygroundPython3 {
@@ -60,29 +65,32 @@ public class DockerPlaygroundPython3 {
                 .withAttachStdout(true)
                 .withAttachStderr(true)
                 .withAttachStdin(true)
-                .withCmd("time -v python3", filePath)  // poprawione formatowanie
+                .withCmd("sh", "-c", "time -v python3 " + filePath)// poprawione formatowanie
                 .exec();
 
         MyResultCallback runFileCallback = new MyResultCallback();
         dockerClient.execStartCmd(execRunFile.getId()).exec(runFileCallback);
 
+        boolean isTimedOut;
         try {
-            runFileCallback.awaitCompletion();
+            isTimedOut = !runFileCallback.awaitCompletion(basicTimeoutTime, TimeUnit.MILLISECONDS);
+
         } catch (InterruptedException e) {
             log.error("Error while running Python code in container", e);
             return "Execution error";
         }
         //killDockerContainer();
+        System.out.println(isTimedOut);
         log.info("Python Run Output: " + runFileCallback.getOutput());
-        int stringLength = runFileCallback.getOutput().length();
-        int outputTimeSize = runFileCallback.getOutput().lastIndexOf("Elapsed (wall clock) time (h:mm:ss or m:ss):");
-        int outputMemorySize = runFileCallback.getOutput().lastIndexOf("Minor (reclaiming a frame) page faults:");
-        int outputTimeStart = runFileCallback.getOutput().lastIndexOf("Command being timed:");
-        String outputTime = runFileCallback.getOutput().substring(outputTimeSize, outputTimeSize + 7);
-        String outputSize = runFileCallback.getOutput().substring(outputMemorySize,outputMemorySize + 7);
-        System.out.println("OutputTime -> " + outputTime);
-        System.out.println("OutputSize -> " + outputSize);
-        return runFileCallback.getOutput().substring(0,stringLength - 20);
+        if(!isTimedOut){
+            String outputTime = getTime(runFileCallback.getOutput());
+            String outputMemory = getMemory(runFileCallback.getOutput());
+
+            log.info("PLAYGROUND: Output time -> " + outputTime + " | Memory -> " + outputMemory);
+            return getOnlyCodeOutput(runFileCallback.getOutput());
+        }
+
+        return "Execution error: Python code took too long to execute";
     }
 }
 

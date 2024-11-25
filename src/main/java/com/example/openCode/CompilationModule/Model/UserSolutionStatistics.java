@@ -16,11 +16,11 @@ public class UserSolutionStatistics {
     private Long id;
 
     @Column(name = "runTime")
-    private Long runTime;
+    private Long runTime; //ms
 
     @Column(name = "memoryUsage")
-    private Long memoryUsage;
+    private Long memoryUsage; //kbytes ??
 
-    @OneToOne
+    @OneToOne(mappedBy = "userSolutionStatistics", cascade = CascadeType.ALL)
     UserSolution userSolution;
 }

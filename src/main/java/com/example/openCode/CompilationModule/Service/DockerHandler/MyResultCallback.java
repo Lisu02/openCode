@@ -9,7 +9,6 @@ public class MyResultCallback extends ExecStartResultCallback {
 
     @Override
     public void onNext(Frame item) {
-        // Tu możesz przetworzyć dane wyjściowe, np. zapisując je do zmiennej logBuilder
         logBuilder.append(new String(item.getPayload()));
         super.onNext(item);
     }
