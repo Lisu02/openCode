@@ -59,7 +59,8 @@ public class DockerPlaygroundPython3 {
         ExecCreateCmdResponse execRunFile = dockerClient.execCreateCmd(python3ContainerId)
                 .withAttachStdout(true)
                 .withAttachStderr(true)
-                .withCmd("python", filePath)  // poprawione formatowanie
+                .withAttachStdin(true)
+                .withCmd("time -v python3", filePath)  // poprawione formatowanie
                 .exec();
 
         MyResultCallback runFileCallback = new MyResultCallback();
@@ -73,7 +74,15 @@ public class DockerPlaygroundPython3 {
         }
         //killDockerContainer();
         log.info("Python Run Output: " + runFileCallback.getOutput());
-        return runFileCallback.getOutput();
+        int stringLength = runFileCallback.getOutput().length();
+        int outputTimeSize = runFileCallback.getOutput().lastIndexOf("Elapsed (wall clock) time (h:mm:ss or m:ss):");
+        int outputMemorySize = runFileCallback.getOutput().lastIndexOf("Minor (reclaiming a frame) page faults:");
+        int outputTimeStart = runFileCallback.getOutput().lastIndexOf("Command being timed:");
+        String outputTime = runFileCallback.getOutput().substring(outputTimeSize, outputTimeSize + 7);
+        String outputSize = runFileCallback.getOutput().substring(outputMemorySize,outputMemorySize + 7);
+        System.out.println("OutputTime -> " + outputTime);
+        System.out.println("OutputSize -> " + outputSize);
+        return runFileCallback.getOutput().substring(0,stringLength - 20);
     }
 }
 
