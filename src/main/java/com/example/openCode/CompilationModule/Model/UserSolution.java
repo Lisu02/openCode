@@ -23,6 +23,11 @@ public class UserSolution {
 
     private Long solvingTaskId;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    UserSolutionStatistics userSolutionStatistics;
+    @OneToOne(
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY,
+            mappedBy = "userSolution"
+    )
+    private UserSolutionStatistics userSolutionStatistics;
 }

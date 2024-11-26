@@ -21,6 +21,8 @@ public class UserSolutionStatistics {
     @Column(name = "memoryUsage")
     private Long memoryUsage; //kbytes ??
 
-    @OneToOne(mappedBy = "userSolutionStatistics", cascade = CascadeType.ALL)
-    UserSolution userSolution;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_solution_id")
+    private UserSolution userSolution;
 }
