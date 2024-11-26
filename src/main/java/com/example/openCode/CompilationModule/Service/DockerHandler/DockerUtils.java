@@ -1,5 +1,10 @@
 package com.example.openCode.CompilationModule.Service.DockerHandler;
 
+import com.example.openCode.CompilationModule.Model.UserSolution;
+import com.example.openCode.CompilationModule.Model.UserSolutionStatistics;
+import com.example.openCode.CompilationModule.Repository.UserSolutionRepository;
+import com.example.openCode.CompilationModule.Repository.UserSolutionStatisticsRepository;
+
 import java.time.Duration;
 
 public class DockerUtils {
@@ -31,6 +36,29 @@ public class DockerUtils {
 
     public static long convertStringMemoryToLong(String memory) {
         return Long.parseLong(memory);
+    }
+
+    public static String stripAndSaveCodeOutput(MyResultCallback callback, UserSolution userSolution, UserSolutionRepository userSolutionRepository, UserSolutionStatisticsRepository userSolutionStatisticsRepository){
+        String outputTime = getTime(callback.getOutput());
+        String outputMemory = getMemory(callback.getOutput());
+
+        //STATYSTYKI WYKONANIA ZADANIA
+        UserSolutionStatistics userSolutionStatistics = UserSolutionStatistics.builder()
+                .runTime(convertStringTimeToLong(outputTime))
+                .memoryUsage(convertStringMemoryToLong(outputMemory))
+                .build();
+
+        userSolutionStatistics.setUserSolution(userSolution);
+        userSolution.setUserSolutionStatistics(userSolutionStatistics);
+
+        System.out.println(userSolutionStatistics.getUserSolution());
+        System.out.println(userSolution.getUserSolutionStatistics());
+
+        userSolutionStatisticsRepository.save(userSolutionStatistics);
+        userSolutionRepository.save(userSolution);
+
+        //log.info("SOLUTION: Output time -> " + outputTime + " | Memory -> " + outputMemory);
+        return getOnlyCodeOutput(callback.getOutput());
     }
 
 }

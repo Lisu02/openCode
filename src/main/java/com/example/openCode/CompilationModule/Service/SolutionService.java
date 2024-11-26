@@ -64,7 +64,7 @@ public class SolutionService {
         if(task != null){
             if(dockerTaskPython3.isTaskCreatedInDockerContainer(task)){
                 userSolutionRepository.save(userSolution);
-                return dockerSolutionPython3.solveInDockerPython3(userSolution, task);
+                return dockerSolutionPython3.solveInDocker(userSolution, task);
             }else {
                 return "Task is not created in Docker container";
             }

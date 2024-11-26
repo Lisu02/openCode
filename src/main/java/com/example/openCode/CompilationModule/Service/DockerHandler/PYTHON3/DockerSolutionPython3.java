@@ -7,6 +7,7 @@ import com.example.openCode.CompilationModule.Repository.UserSolutionRepository;
 import com.example.openCode.CompilationModule.Repository.UserSolutionStatisticsRepository;
 import com.example.openCode.CompilationModule.Service.DockerHandler.ContainerIdList;
 import com.example.openCode.CompilationModule.Service.DockerHandler.DockerConfiguration;
+import com.example.openCode.CompilationModule.Service.DockerHandler.DockerSolutionHandler;
 import com.example.openCode.CompilationModule.Service.DockerHandler.GCC.DockerSolutionGCC;
 import com.example.openCode.CompilationModule.Service.DockerHandler.MyResultCallback;
 import com.github.dockerjava.api.DockerClient;
@@ -21,27 +22,23 @@ import java.util.concurrent.TimeUnit;
 import static com.example.openCode.CompilationModule.Service.DockerHandler.DockerUtils.*;
 
 @Component
-public class DockerSolutionPython3 {
+public class DockerSolutionPython3 extends DockerSolutionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DockerSolutionPython3.class);
     private DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
     private String python3ContainerId = ContainerIdList.getPython3ContainerId();
-    private UserSolutionRepository userSolutionRepository;
-    private UserSolutionStatisticsRepository userSolutionStatisticsRepository;
 
     @Autowired
     public DockerSolutionPython3(UserSolutionRepository userSolutionRepository, UserSolutionStatisticsRepository userSolutionStatisticsRepository) {
-        this.userSolutionRepository = userSolutionRepository;
-        this.userSolutionStatisticsRepository = userSolutionStatisticsRepository;
+        super(userSolutionRepository, userSolutionStatisticsRepository);
     }
 
-    public String solveInDockerPython3(UserSolution userSolution, Task task) {
+    public String solveInDocker(UserSolution userSolution, Task task) {
         addUserSolutionToTaskCatalog(userSolution, task);
-        return runCode(userSolution, task);
+        return runCodeWithTests(userSolution, task);
     }
 
-
-    private void addUserSolutionToTaskCatalog(UserSolution userSolution, Task task) {
+    protected String addUserSolutionToTaskCatalog(UserSolution userSolution, Task task) {
         String userSolutionFilePath = "/tmp/" + task.getId() + "-" + task.getFunctionName() + "/" + userSolution.getId() + ".py";
         // /tmp/" + task.getId() + "-" + task.getFunctionName() + "/" + userSolution.getId()
         ExecCreateCmdResponse addSolutionCommand = dockerClient.execCreateCmd(python3ContainerId)
@@ -62,9 +59,10 @@ public class DockerSolutionPython3 {
         }
 
         log.info("addUserSolutionToTaskCatalog finished output: {}", addSolutionCallback.getOutput());
+        return addSolutionCallback.getOutput();
     }
 
-    private String runCode(UserSolution userSolution,Task task) {
+    protected String runCodeWithTests(UserSolution userSolution,Task task) {
 
         String solutionFileName = userSolution.getId() + ".py";
         // ./tmp/" + taskCatalogName + "/" + solutionFileName
@@ -88,26 +86,7 @@ public class DockerSolutionPython3 {
         log.info("runCode for Python output: {}",runCallback.getOutput());
 
         if(!isTimedOut){
-            String outputTime = getTime(runCallback.getOutput());
-            String outputMemory = getMemory(runCallback.getOutput());
-
-            //STATYSTYKI WYKONANIA ZADANIA
-            UserSolutionStatistics userSolutionStatistics = UserSolutionStatistics.builder()
-                    .runTime(convertStringTimeToLong(outputTime))
-                    .memoryUsage(convertStringMemoryToLong(outputMemory))
-                    .build();
-
-            userSolutionStatistics.setUserSolution(userSolution);
-            userSolution.setUserSolutionStatistics(userSolutionStatistics);
-
-            System.out.println(userSolutionStatistics.getUserSolution());
-            System.out.println(userSolution.getUserSolutionStatistics());
-
-            userSolutionStatisticsRepository.save(userSolutionStatistics);
-            userSolutionRepository.save(userSolution);
-
-            log.info("SOLUTION: Output time -> " + outputTime + " | Memory -> " + outputMemory);
-            return getOnlyCodeOutput(runCallback.getOutput());
+            return processOutput(runCallback,userSolution);
         }
 
 
