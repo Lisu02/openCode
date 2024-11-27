@@ -29,18 +29,22 @@ services:
     container_name: openCode-pythonInterpreter
     tty: true
     init: false
-
-#  app:
-#    image: open-code-app
-#    container_name: openCode-app
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - postgres
-#    environment:
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openCodeDB
-#      SPRING_DATASOURCE_USERNAME: user
-#      SPRING_DATASOURCE_PASSWORD: user
+  app:
+    image: open-code-app
+    container_name: openCode-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    tty: true
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openCodeDB
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: user
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - openCodeNetwork
