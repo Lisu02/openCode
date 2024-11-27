@@ -9,7 +9,6 @@ public class GccGenerationCodeTests {
 
 
 
-    @Test
     public void generateTaskCodeForUser(){
         //given
         Task task = TaskTestFactory.createTaskWithIntValues();

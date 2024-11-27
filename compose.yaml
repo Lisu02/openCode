@@ -1,3 +1,5 @@
+networks:
+  openCodeNetwork:
 services:
   postgres:
     image: 'postgres:latest'
@@ -6,13 +8,17 @@ services:
       - 'POSTGRES_PASSWORD=user'
       - 'POSTGRES_USER=user'
     ports:
-      - '5432'
+      - '5433:5432'
+    networks:
+      - openCodeNetwork
   adminer:
     image: adminer:latest
     container_name: openCode-adminer
     restart: always
     ports:
       - "2080:8080"
+    networks:
+      - openCodeNetwork
   gccCompiler:
     image: gcc:14.2.0
     container_name: openCode-GccCompiler
@@ -23,3 +29,18 @@ services:
     container_name: openCode-pythonInterpreter
     tty: true
     init: false
+
+#  app:
+#    image: open-code-app
+#    container_name: openCode-app
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - postgres
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openCodeDB
+#      SPRING_DATASOURCE_USERNAME: user
+#      SPRING_DATASOURCE_PASSWORD: user
