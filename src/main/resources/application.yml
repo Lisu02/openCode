@@ -1,15 +1,15 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/openCodeDB
-    username: user
-    password: user
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/openCodeDB}
+    username: ${DATABASE_USERNAME:user}
+    password: ${DATABASE_PASSWORD:user}
     driver-class-name: org.postgresql.Driver
     oracleucp:
       database-name: openCodeDB
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true

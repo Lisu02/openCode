@@ -8,7 +8,7 @@ services:
       - 'POSTGRES_PASSWORD=user'
       - 'POSTGRES_USER=user'
     ports:
-      - '5433:5432'
+      - '5432:5432'
     networks:
       - openCodeNetwork
   adminer:
@@ -41,9 +41,12 @@ services:
     depends_on:
       - postgres
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openCodeDB
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: user
+      POSTGRES_DB: openCodeDB
+      POSTGRES_PASSWORD: user
+      POSTGRES_USER: user
+      SPRING_DATASOURCE_URL: ${DATABASE_URL:-jdbc:postgresql://localhost:5432/openCodeDB}
+      SPRING_DATASOURCE_USERNAME: ${DATABASE_USERNAME:-user}
+      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD:-user}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
