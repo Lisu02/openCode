@@ -1,5 +1,6 @@
 package com.example.openCode.CompilationModule.Model.Users;
 
+import com.example.openCode.CompilationModule.Model.Task.Task;
 import com.example.openCode.CompilationModule.Model.UserSolution;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -21,4 +22,7 @@ public class Users {
 
     @OneToMany(mappedBy = "user")
     List<UserSolution> userSolutions;
+
+    @OneToMany(mappedBy = "user")
+    List<Task> taskList;
 }

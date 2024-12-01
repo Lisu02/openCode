@@ -1,6 +1,7 @@
 package com.example.openCode.CompilationModule.Model.Task;
 
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
+import com.example.openCode.CompilationModule.Model.Users.Users;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,6 +15,14 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Task {
+
+    public Task(long id, ReturnType returnType, String functionName, List<FunctionArgument> argumentList, List<TestTask> testTaskList) {
+        this.id = id;
+        this.returnType = returnType;
+        this.functionName = functionName;
+        this.argumentList = argumentList;
+        this.testList = testTaskList;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -31,6 +40,9 @@ public class Task {
 
     @OneToMany(mappedBy = "task")
     private List<TestTask> testList;
+
+    @ManyToOne
+    Users user;
 
 
     public String getCatalogName(){
