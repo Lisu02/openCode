@@ -324,7 +324,7 @@ public class TaskController {
         return taskService.getTaskDTObyId(id);
     }
 
-    @GetMapping("/v1/addTask/{id}")
+    @GetMapping("/v1/generateTask/{id}")
     public void generateTask(@PathVariable("id")long id){
         Task task = taskService.getTaskById(id);
         if(task != null){

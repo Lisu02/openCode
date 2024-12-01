@@ -37,7 +37,7 @@ class SecurityConfig {
         http.authorizeHttpRequests(request -> request
                 .requestMatchers("/register").permitAll()
                 .requestMatchers("/login").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()  // permitAll -> authenticated
         ).httpBasic(Customizer.withDefaults());
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable());
