@@ -1,4 +1,4 @@
-package com.example.openCode.CompilationModule.Service.Security;
+package com.example.openCode.CompilationModule.Service.UserSecurity;
 
 import com.example.openCode.CompilationModule.Model.Users.UserPrincipal;
 import com.example.openCode.CompilationModule.Model.Users.Users;

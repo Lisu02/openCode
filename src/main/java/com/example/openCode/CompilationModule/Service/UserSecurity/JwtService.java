@@ -1,4 +1,4 @@
-package com.example.openCode.CompilationModule.Service.Security;
+package com.example.openCode.CompilationModule.Service.UserSecurity;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

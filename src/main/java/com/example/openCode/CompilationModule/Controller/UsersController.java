@@ -1,7 +1,7 @@
 package com.example.openCode.CompilationModule.Controller;
 
 import com.example.openCode.CompilationModule.Model.Users.Users;
-import com.example.openCode.CompilationModule.Service.Security.UsersService;
+import com.example.openCode.CompilationModule.Service.UserSecurity.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
