@@ -12,4 +12,6 @@ public class TaskDTO {
     private String functionName;
     private List<FunctionArgumentDTO> argumentList;
     private List<TestTaskDTO> testList;
+    private String creatorUsername;
+    private TaskDescriptionDTO taskDescription;
 }

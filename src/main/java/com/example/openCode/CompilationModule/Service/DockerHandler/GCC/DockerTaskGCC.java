@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import javax.xml.transform.Source;
 import java.util.Iterator;
+import java.util.Map;
 
 import static com.example.openCode.CompilationModule.Service.Task.TaskService.isTaskArrayType;
 import static com.example.openCode.CompilationModule.Service.Task.TaskService.isTypeAnArrayType;
@@ -495,4 +496,16 @@ public class DockerTaskGCC implements DockerTaskLanguage {
     }
 
 
+    public void getTaskCodeForUser(Task task, Map<String, String> response) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if(isTaskCreatedInDockerContainer(task)){
+            generateTaskCodeForUser(task,stringBuilder,true);
+            response.put("codeForUserGCC", stringBuilder.toString());
+        }else {
+            createTaskInContainer(task);
+            generateTaskCodeForUser(task,stringBuilder,true);
+            response.put("codeForUserGCC", stringBuilder.toString());
+        }
+    }
 }

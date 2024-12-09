@@ -1,12 +1,10 @@
 package com.example.openCode.CompilationModule.Service.Task;
 
-import com.example.openCode.CompilationModule.DTO.FunctionArgumentDTO;
-import com.example.openCode.CompilationModule.DTO.TaskDTO;
-import com.example.openCode.CompilationModule.DTO.TestInputArgumentDTO;
-import com.example.openCode.CompilationModule.DTO.TestTaskDTO;
+import com.example.openCode.CompilationModule.DTO.*;
 import com.example.openCode.CompilationModule.Model.Task.ReturnType;
 import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.Task;
+import com.example.openCode.CompilationModule.Model.Task.TaskDescription;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
 import com.example.openCode.CompilationModule.Repository.TaskRepository;
@@ -45,6 +43,7 @@ public  class TaskMapper {
                 .functionName(task.getFunctionName())
                 .argumentList(mapFunctionArgumentListToDTO(task.getArgumentList()))
                 .testList(mapTestTaskListToDTO(task.getTestList()))
+                .creatorUsername(task.getUser().getUsername())
                 .build();
     }
 
@@ -54,8 +53,13 @@ public  class TaskMapper {
                 .functionName(taskDTO.getFunctionName())
                 .argumentList(mapFunctionArgumentDTOListToObject(taskDTO.getArgumentList()))
                 .testList(mapTestTaskDTOListToObject(taskDTO.getTestList()))
+                //.taskDescription(mapTaskDescriptionDTOtoObject(taskDTO.getTaskDescription()))
                 .build();
     }
+
+//    private TaskDescription mapTaskDescriptionDTOtoObject(TaskDescriptionDTO taskDescriptionDTO,TaskDTO taskDTO) {
+//        return new TaskDescription(0L,taskDescriptionDTO.getDescription(),taskDTO.getId());
+//    }
 
     public List<TaskDTO> mapTaskListToTaskDTOList(List<Task> taskList){
         return taskList.stream().map(this::mapTaskToDTO).toList();

@@ -25,7 +25,16 @@ public class UsersService {
         this.jwtService = jwtService;
     }
 
+    public boolean isUsernameTaken(String username) {
+        return usersRepo.findByUsername(username) != null;
+    }
+
+    //Cannot register a user that already exists AO.
     public Users register(Users user) {
+        Users userFromDB = usersRepo.findByUsername(user.getUsername());
+        if (userFromDB != null) {
+            return null;
+        }
         user.setPassword(encoder.encode(user.getPassword()));
         return usersRepo.save(user);
     }

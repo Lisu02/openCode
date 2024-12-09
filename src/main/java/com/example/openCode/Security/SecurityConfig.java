@@ -38,7 +38,7 @@ class SecurityConfig {
                 .requestMatchers("/register").permitAll()
                 .requestMatchers("/login").permitAll()
                 .anyRequest().permitAll()  // permitAll -> authenticated
-        ).httpBasic(Customizer.withDefaults());
+        ).httpBasic(httpSecurityHttpBasicConfigurer -> httpSecurityHttpBasicConfigurer.disable());
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable());
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

@@ -22,29 +22,31 @@ services:
   gccCompiler:
     image: gcc:14.2.0
     container_name: openCode-GccCompiler
+    command: [ "sh","-c","apt update && apt install time" ]
     tty: true
     init: false
   python3Interpreter:
     image: python:3
     container_name: openCode-pythonInterpreter
+    command: ["sh","-c","apt update && apt install time"]
     tty: true
     init: false
-  app:
-    image: open-code-app
-    container_name: openCode-app
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    tty: true
-    depends_on:
-      - postgres
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openCodeDB
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: user
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - openCodeNetwork
+#  app:
+#    image: open-code-app
+#    container_name: openCode-app
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    tty: true
+#    depends_on:
+#      - postgres
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/openCodeDB
+#      SPRING_DATASOURCE_USERNAME: user
+#      SPRING_DATASOURCE_PASSWORD: user
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    networks:
+#      - openCodeNetwork

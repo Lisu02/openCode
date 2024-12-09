@@ -6,12 +6,18 @@ import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.Task;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
+import com.example.openCode.CompilationModule.Model.Users.UserPrincipal;
+import com.example.openCode.CompilationModule.Model.Users.Users;
 import com.example.openCode.CompilationModule.Service.DockerHandler.GCC.DockerTaskGCC;
 import com.example.openCode.CompilationModule.Service.DockerHandler.PYTHON3.DockerTaskPython3;
 import com.example.openCode.CompilationModule.Service.Task.TaskService;
+import com.example.openCode.CompilationModule.Service.UserSecurity.MyUserDetailsService;
+import com.example.openCode.CompilationModule.Service.UserSecurity.UsersService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Iterator;
@@ -22,20 +28,37 @@ import java.util.List;
 public class TaskController {
 
     TaskService taskService;
+    MyUserDetailsService myUserDetailsService;
     DockerTaskGCC dockerTaskGCC;
     DockerTaskPython3 dockerTaskPython3;
     private static final Logger log = LoggerFactory.getLogger(TaskController.class);
 
 
     @Autowired
-    public TaskController(TaskService taskService, DockerTaskGCC dockerTaskGCC, DockerTaskPython3 dockerTaskPython3) {
+    public TaskController(TaskService taskService, MyUserDetailsService myUserDetailsService, DockerTaskGCC dockerTaskGCC, DockerTaskPython3 dockerTaskPython3) {
         this.taskService = taskService;
+        this.myUserDetailsService = myUserDetailsService;
         this.dockerTaskGCC = dockerTaskGCC;
         this.dockerTaskPython3 = dockerTaskPython3;
     }
 
     @PostMapping("/v1/addTask")
     public void addTask(@RequestBody TaskDTO taskDTO) {
+
+        // Pobranie nazwy użytkownika z kontekstu bezpieczeństwa (tokenu)
+        String username = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            username = ((UserDetails) principal).getUsername();
+        } else {
+            username = principal.toString();
+        }
+
+        // Pobranie użytkownika z MyUserDetailsService na podstawie nazwy użytkownika
+        UserDetails userDetails = myUserDetailsService.loadUserByUsername(username); // Wykorzystanie loadUserByUsername
+
+        // Uzyskanie obiektu Users z UserDetails
+        Users user = ((UserPrincipal) userDetails).getUser();  // Rzutowanie na UserPrincipal i uzyskanie obiektu Users
 
 
         List<FunctionArgument> funArgList = new LinkedList<>();
@@ -79,6 +102,7 @@ public class TaskController {
                 .functionName(taskDTO.getFunctionName())
                 .argumentList(funArgList)
                 .testList(testTaskList)
+                .user(user)
                 .build();
 
         funArgList.forEach(it -> it.setTask(task));
@@ -307,12 +331,18 @@ public class TaskController {
     public List<TaskSmallDTO> getAllTasksId(){
         Iterator<Task> taskIterator =  taskService.getAllTasks().iterator();
         List<TaskSmallDTO> taskList = new LinkedList<>();
+        String username = "username-not-assigned";
         while(taskIterator.hasNext()){
             Task task = taskIterator.next();
+
+            if(task.getUser() != null){
+                username = task.getUser().getUsername();
+            }
             TaskSmallDTO taskSmallDTO = TaskSmallDTO.builder()
                     .taskId(task.getId())
                     .returnType(String.valueOf(task.getReturnType()))
                     .functionName(task.getFunctionName())
+                    .creatorUsername(username)
                     .build();
             taskList.add(taskSmallDTO);
         }
@@ -337,19 +367,15 @@ public class TaskController {
     }
 
 
-//    @PostMapping("v1/task/resolve/{id}")
-//    public String resolveTask(@PathVariable("id") long id,String code){
-//        Task task = taskService.getTaskById(id);
-//        if(task != null){
-//            //return taskService.solveTask(code);
-//            return null;
-//        }else{
-//            return "TASK NOT FOUND";
-//        }
-//    }
-
     @PostMapping("/v1/task")
     public void putTask(@RequestBody TaskDTO taskDTO){
         taskService.saveTaskDTO(taskDTO);
     }
+
+    @GetMapping("/v1/task/description/{id}")
+    public void getTaskDescription(@PathVariable("id") long id){
+        Task task = taskService.getTaskById(id);
+        task.getTaskDescription();
+    }
+
 }

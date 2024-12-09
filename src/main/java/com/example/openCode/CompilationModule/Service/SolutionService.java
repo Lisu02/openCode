@@ -13,6 +13,8 @@ import org.antlr.v4.runtime.misc.DoubleKeyMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 public class SolutionService {
 
@@ -41,8 +43,6 @@ public class SolutionService {
         };
     }
 
-    //TODO: Implement DRY!!!
-
     private String solveGCC(UserSolution userSolution) {
         Task task = taskService.getTaskById(userSolution.getSolvingTaskId());
 
@@ -70,5 +70,11 @@ public class SolutionService {
             }
         }
         return "Task does not exist";
+    }
+
+    public void getTaskInfo(long id, Map<String, String> response) {
+        Task task = taskService.getTaskById(id);
+        dockerTaskGCC.getTaskCodeForUser(task,response);
+        dockerTaskPython3.getTaskCodeForUser(task,response);
     }
 }

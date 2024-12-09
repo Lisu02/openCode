@@ -4,12 +4,10 @@ import com.example.openCode.CompilationModule.DTO.TaskDTO;
 import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.ReturnType;
 import com.example.openCode.CompilationModule.Model.Task.Task;
+import com.example.openCode.CompilationModule.Model.Task.TaskDescription;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
-import com.example.openCode.CompilationModule.Repository.FunctionArgumentRepository;
-import com.example.openCode.CompilationModule.Repository.TaskRepository;
-import com.example.openCode.CompilationModule.Repository.TestArgumentRepository;
-import com.example.openCode.CompilationModule.Repository.TestTaskRepository;
+import com.example.openCode.CompilationModule.Repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +24,7 @@ public class TaskService {
     FunctionArgumentRepository functionArgumentRepository;
     TestTaskRepository testTaskRepository;
     TestArgumentRepository testArgumentRepository;
+    TaskDescriptionRepository taskDescriptionRepository;
     TaskMapper taskMapper;
 
     private static final Logger log = LoggerFactory.getLogger(TaskService.class);
@@ -36,12 +35,14 @@ public class TaskService {
                        FunctionArgumentRepository functionArgumentRepository,
                        TestTaskRepository testTaskRepository,
                        TestArgumentRepository testArgumentRepository,
+                       TaskDescriptionRepository taskDescriptionRepository,
                        TaskMapper taskMapper
     ){
         this.taskRepository = taskRepository;
         this.functionArgumentRepository = functionArgumentRepository;
         this.testTaskRepository = testTaskRepository;
         this.testArgumentRepository = testArgumentRepository;
+        this.taskDescriptionRepository = taskDescriptionRepository;
         this.taskMapper = taskMapper;
     }
 
@@ -89,6 +90,7 @@ public class TaskService {
     }
 
     //-------------GETTING TASKS-------------
+
 
     public List<TaskDTO> getTaskDTOList(){
         List<Task> taskList = taskRepository.findAll();

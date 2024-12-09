@@ -44,6 +44,10 @@ public class Task {
     @ManyToOne
     Users user;
 
+    @OneToOne
+    @JoinColumn(name = "taskDescription_id")
+    TaskDescription taskDescription;
+
 
     public String getCatalogName(){
         return getId() + "-" + getFunctionName();
