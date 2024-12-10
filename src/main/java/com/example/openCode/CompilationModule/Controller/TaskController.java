@@ -16,6 +16,8 @@ import com.example.openCode.CompilationModule.Service.UserSecurity.UsersService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -377,5 +379,37 @@ public class TaskController {
         Task task = taskService.getTaskById(id);
         task.getTaskDescription();
     }
+
+
+    @DeleteMapping("/v1/task/{id}")
+    public ResponseEntity<?> deleteTask(@PathVariable long id) {
+        // Pobranie nazwy użytkownika z kontekstu bezpieczeństwa (tokenu)
+        String username = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            username = ((UserDetails) principal).getUsername();
+        } else {
+            username = principal.toString();
+        }
+
+        // Pobranie użytkownika z MyUserDetailsService na podstawie nazwy użytkownika
+        UserDetails userDetails = myUserDetailsService.loadUserByUsername(username); // Wykorzystanie loadUserByUsername
+
+        // Uzyskanie obiektu Users z UserDetails
+        Users user = ((UserPrincipal) userDetails).getUser();  // Rzutowanie na UserPrincipal i uzyskanie obiektu Users;
+
+        Task task = taskService.getTaskById(id);
+        if (task == null) {
+            return new ResponseEntity<>("Task not found", HttpStatus.NOT_FOUND);
+        }
+
+        if (task.getUser().getId() != user.getId()) {
+            return new ResponseEntity<>("Unauthorized to delete this task", HttpStatus.FORBIDDEN);
+        }
+
+        taskService.removeTask(task);
+        return new ResponseEntity<>("Task deleted successfully", HttpStatus.OK);
+    }
+
 
 }

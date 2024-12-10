@@ -184,4 +184,11 @@ public class TaskService {
         //Adding a task to a docker with test.c generator
     }
 
+    public void removeTask(Task task) {
+        //Usuwanie powiązanych encji [jest cascade ale to dla tesow]
+        task.getArgumentList().clear();
+        task.getTestList().clear();
+
+        taskRepository.delete(task);
+    }
 }

@@ -31,7 +31,7 @@ public class TestTask {
     @ManyToOne
     private Task task;
 
-    @OneToMany(mappedBy = "testTask")
+    @OneToMany(mappedBy = "testTask", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TestArgument> testArguments;
 
     @Column(name = "expectedValue")

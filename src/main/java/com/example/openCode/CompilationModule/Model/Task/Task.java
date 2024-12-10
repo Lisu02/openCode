@@ -35,10 +35,10 @@ public class Task {
     @Column(name = "funtionName")
     private String functionName;
 
-    @OneToMany(mappedBy = "task")
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FunctionArgument> argumentList;
 
-    @OneToMany(mappedBy = "task")
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TestTask> testList;
 
     @ManyToOne

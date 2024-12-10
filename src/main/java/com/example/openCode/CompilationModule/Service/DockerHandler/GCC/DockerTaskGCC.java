@@ -62,7 +62,7 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println(callback.getOutput());
+            log.atInfo().log("GCC creation callback output ->" + callback.getOutput());
         }
     }
 
