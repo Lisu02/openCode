@@ -9,25 +9,35 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 public class OpenCodeApplication {
 
-	private static final Dotenv DOTENV = Dotenv.load();
-
+	private static final Dotenv DOTENV = Dotenv.configure().ignoreIfMissing().load();
 
 	public static void main(String[] args) {
 		System.out.println("Aplikacja uruchamianie...");
-		System.out.println(DOTENV.get("DB_HOST"));
-		System.out.println(DOTENV.get("DB_PORT"));
-		System.out.println(DOTENV.get("DB_NAME"));
-		System.out.println(DOTENV.get("DB_USER"));
-		System.out.println(DOTENV.get("DB_PASSWORD"));
-//		if (System.getProperty("DB_HOST") == null) {
-//			System.setProperty("DB_HOST", DOTENV.get("DB_HOST"));
-//			System.setProperty("DB_PORT", DOTENV.get("DB_PORT"));
-//			System.setProperty("DB_NAME", DOTENV.get("DB_NAME"));
-//			System.setProperty("DB_USER", DOTENV.get("DB_USER"));
-//			System.setProperty("DB_PASSWORD", DOTENV.get("DB_PASSWORD"));
-//		}
+
+		// Pobieranie zmiennych
+		String dbHost = getEnvVariable("DB_HOST", "postgres");
+		String dbPort = getEnvVariable("DB_PORT", "5432");
+		String dbName = getEnvVariable("DB_NAME", "openCodeDB");
+		String dbUser = getEnvVariable("DB_USER", "user");
+		String dbPassword = getEnvVariable("DB_PASSWORD", "user");
+
+		// debug
+		System.out.println("DB_HOST: " + dbHost);
+		System.out.println("DB_PORT: " + dbPort);
+		System.out.println("DB_NAME: " + dbName);
+		System.out.println("DB_USER: " + dbUser);
+		System.out.println("DB_PASSWORD: " + dbPassword);
+
 		SpringApplication.run(OpenCodeApplication.class, args);
 	}
 
-
+	//  zmienne środowiskowowe z domyślną wartością
+	private static String getEnvVariable(String key, String defaultValue) {
+		String value = System.getenv(key); // Pobierz z systemu
+		if (value == null) {
+			value = DOTENV.get(key); // Pobierz z .env, jeśli brak w systemie
+		}
+		return value != null ? value : defaultValue;
+	}
 }
+
