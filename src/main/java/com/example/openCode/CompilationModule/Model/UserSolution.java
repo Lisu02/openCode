@@ -1,5 +1,6 @@
 package com.example.openCode.CompilationModule.Model;
 
+import com.example.openCode.CompilationModule.Model.Users.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
@@ -30,4 +31,7 @@ public class UserSolution {
             mappedBy = "userSolution"
     )
     private UserSolutionStatistics userSolutionStatistics;
+
+    @ManyToOne
+    Users user;
 }

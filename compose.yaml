@@ -1,12 +1,13 @@
 networks:
   openCodeNetwork:
+    driver: bridge
 services:
   postgres:
     image: 'postgres:latest'
     environment:
-      - 'POSTGRES_DB=openCodeDB'
-      - 'POSTGRES_PASSWORD=user'
-      - 'POSTGRES_USER=user'
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_USER}
+      POSTGRES_USER: ${DB_PASSWORD}
     ports:
       - '5432:5432'
     networks:
@@ -22,13 +23,19 @@ services:
   gccCompiler:
     image: gcc:14.2.0
     container_name: openCode-GccCompiler
+    command: ["sh", "-c", "apt update && apt install time && tail -f /dev/null"]
     tty: true
-    init: false
+    init: true
+    networks:
+      - openCodeNetwork
   python3Interpreter:
     image: python:3
     container_name: openCode-pythonInterpreter
+    command: ["sh", "-c", "apt update && apt install time && tail -f /dev/null"]
     tty: true
-    init: false
+    init: true
+    networks:
+      - openCodeNetwork
   app:
     image: open-code-app
     container_name: openCode-app
@@ -41,13 +48,16 @@ services:
     depends_on:
       - postgres
     environment:
-      POSTGRES_DB: openCodeDB
-      POSTGRES_PASSWORD: user
-      POSTGRES_USER: user
-      SPRING_DATASOURCE_URL: ${DATABASE_URL:-jdbc:postgresql://localhost:5432/openCodeDB}
-      SPRING_DATASOURCE_USERNAME: ${DATABASE_USERNAME:-user}
-      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD:-user}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     volumes:
+      - C:\Users\termi\IdeaProjects\openCode\.env:/app/.env
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - openCodeNetwork

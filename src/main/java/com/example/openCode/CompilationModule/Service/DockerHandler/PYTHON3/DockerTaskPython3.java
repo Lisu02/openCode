@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Iterator;
+import java.util.Map;
 
 @Component
 public class DockerTaskPython3 implements DockerTaskLanguage {
@@ -263,4 +264,17 @@ public class DockerTaskPython3 implements DockerTaskLanguage {
     }
 
 
+    public void getTaskCodeForUser(Task task, Map<String, String> response) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("def ").append(task.getFunctionName()).append("(");
+        Iterator<FunctionArgument> fnArgIterator = task.getArgumentList().iterator();
+        while(fnArgIterator.hasNext()) {
+            FunctionArgument fnArg = fnArgIterator.next();
+            builder.append(fnArg.getName()).append(": ").append(getTypeToFunction(fnArg.getType()));
+            if(fnArgIterator.hasNext()){builder.append(", ");}
+        }
+        builder.append("):\n");
+        builder.append("\t");
+        response.put("codeForUserPYTHON3",builder.toString());
+    }
 }

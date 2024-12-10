@@ -9,4 +9,5 @@ public class TaskSmallDTO {
     private long taskId;
     private String returnType;
     private String functionName;
+    private String creatorUsername;
 }

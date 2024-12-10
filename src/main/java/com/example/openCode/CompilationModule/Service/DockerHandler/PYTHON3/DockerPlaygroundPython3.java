@@ -80,7 +80,7 @@ public class DockerPlaygroundPython3 {
             return "Execution error";
         }
         //killDockerContainer();
-        System.out.println(isTimedOut);
+        log.atInfo().log("isTimedOut property -> " + isTimedOut);
         log.info("Python Run Output: " + runFileCallback.getOutput());
         if(!isTimedOut){
             String outputTime = getTime(runFileCallback.getOutput());
