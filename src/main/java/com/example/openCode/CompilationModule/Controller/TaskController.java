@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 @RestController()
+@CrossOrigin(origins = "*")
 public class TaskController {
 
     TaskService taskService;

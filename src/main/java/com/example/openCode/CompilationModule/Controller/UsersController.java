@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "*")
 public class UsersController {
 
     private UsersService usersService;
@@ -40,11 +41,13 @@ public class UsersController {
         if(usersService.isUsernameTaken(users.getUsername())){
             response.put("message","Username is already in use");
             response.put("username",users.getUsername());
+            log.atWarn().log("Username is already in use");
             return new ResponseEntity<>(response,HttpStatus.CONFLICT);
 
         }
         Users returnUser = usersService.register(users);
         response.put("message","User" + returnUser.getUsername() + " created successfully");
+        log.atInfo().log("User: " + returnUser.getUsername() + " created successfully");
         return new ResponseEntity<>(response,HttpStatus.CREATED);
     }
 
