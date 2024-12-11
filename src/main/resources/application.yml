@@ -16,4 +16,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 server:
   port: 8080
+logging:
+  level:
+    org.springframework: INFO
 

@@ -13,8 +13,10 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("*") // Adres frontendu
+                        .allowedOrigins("http://localhost:3000", "https://open-code-front-vue-urxw.vercel.app")
+                        .allowedHeaders("Authorization","Content-Type")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+                        //.allowCredentials(true);
             }
         };
     }

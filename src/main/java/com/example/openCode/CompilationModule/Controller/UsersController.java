@@ -12,8 +12,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -25,13 +32,18 @@ public class UsersController {
 
     private UsersService usersService;
     private MyUserDetailsService myUserDetailsService;
+    private AuthenticationManager authenticationManager;
+    private SecurityContextHolderStrategy securityContextHolderStrategy;
     private static final Logger log = LoggerFactory.getLogger(UsersController.class);
 
 
     @Autowired
-    public UsersController(UsersService usersService,MyUserDetailsService myUserDetailsService) {
+    public UsersController(UsersService usersService,
+                           MyUserDetailsService myUserDetailsService,
+                           AuthenticationManager authenticationManager) {
         this.usersService = usersService;
         this.myUserDetailsService = myUserDetailsService;
+        this.authenticationManager = authenticationManager;
     }
 
     @PostMapping("/register")
@@ -51,8 +63,17 @@ public class UsersController {
         return new ResponseEntity<>(response,HttpStatus.CREATED);
     }
 
+//    private SecurityContextRepository securityContextRepository =
+//            new HttpSessionSecurityContextRepository();
+
     @PostMapping("/login")
-    public String login(@RequestBody Users users){
+    public String login(@RequestBody Users users,HttpServletRequest request,HttpServletResponse response){
+//        UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken.unauthenticated(
+//                users.getUsername(), users.getPassword());
+//        Authentication auth = authenticationManager.authenticate(token);
+//        SecurityContext context = securityContextHolderStrategy.createEmptyContext();
+
+
         return usersService.login(users);
     }
 

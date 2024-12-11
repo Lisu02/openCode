@@ -3,10 +3,10 @@ package com.example.openCode;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
-@EnableAsync
 public class OpenCodeApplication {
 
 	private static final Dotenv DOTENV = Dotenv.configure().ignoreIfMissing().load();

@@ -32,7 +32,7 @@ public abstract class DockerSolutionHandler {
         userSolutionStatisticsRepository.save(statistics);
         userSolutionRepository.save(userSolution);
 
-        return DockerUtils.getOnlyCodeOutput(callback.getOutput());
+        return DockerUtils.getOnlyCodeOutput(callback.getOutput()) + "\n\nOutput time -> " + outputTime +"ms" + " | Memory -> " + outputMemory +"kb";
     }
 
     public abstract String solveInDocker(UserSolution userSolution, Task task);

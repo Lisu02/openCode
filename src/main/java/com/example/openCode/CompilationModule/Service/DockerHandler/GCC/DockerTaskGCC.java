@@ -45,6 +45,10 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             generateTaskCodeForUser(task, testCodeForUser, true);
             generateTaskCodeForTests(task, testCodeForTests, catalogName);
 
+            // Przekształcanie wartości CHARVECTOR
+            //String formattedTestCodeForTests = formatCharVector(testCodeForTests.toString());
+
+
             ExecCreateCmdResponse createTaskDocker2 = dockerClient.execCreateCmd(gccContainerId)
                     .withAttachStdout(true)
                     .withAttachStderr(true)
@@ -65,6 +69,11 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             log.atInfo().log("GCC creation callback output ->" + callback.getOutput());
         }
     }
+
+//    private String formatCharVector(String code) {
+//        // Przekształcenie CHARVECTOR w odpowiedni format dla printf
+//        return code.replaceAll("([a-zA-Z])", "'$1'");
+//    }
 
 
     public Boolean isTaskCreatedInDockerContainer(Task task) {

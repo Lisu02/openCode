@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
@@ -21,6 +22,7 @@ public class JwtService {
 
 
     private String secretKey = "";
+    //smrodek1raz1dwa1trzy1cztery1piec1szesc1siedem1osiem1dziewiec1dziesiec1jedenasie1dwanasie1trzynascie1czternascieee
 
     public JwtService() {
         try {
@@ -56,7 +58,7 @@ public class JwtService {
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
-        final Claims claims = extractAllClaims(token);
+        Claims claims = extractAllClaims(token);
         return claimResolver.apply(claims);
     }
 
@@ -81,4 +83,5 @@ public class JwtService {
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
+
 }

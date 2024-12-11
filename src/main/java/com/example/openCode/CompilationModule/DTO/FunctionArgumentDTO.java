@@ -10,5 +10,6 @@ public class FunctionArgumentDTO {
     private long id;
     private String type;
     private String name;
+    private int size;
     private long task;
 }

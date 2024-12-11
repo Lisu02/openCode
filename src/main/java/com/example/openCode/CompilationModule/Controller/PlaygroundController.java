@@ -29,14 +29,13 @@ public class PlaygroundController {
 
 
     @PostMapping("/playgroundCompile/v2")
-    @Async
-    public CompletableFuture<String> playgroundCompilation(@RequestBody PlaygroundDTO playgroundDTO) {
+    public String playgroundCompilation(@RequestBody PlaygroundDTO playgroundDTO) {
         PlaygroundCode playgroundCode = new PlaygroundCode(incrementCodeID(),
                 playgroundDTO.getProgrammingLanguage().toUpperCase(),
                 playgroundDTO.getCode());
         System.out.println("------PLAYGROUND CONTROLLER----");
         System.out.println(playgroundCode.getCode());
-        return CompletableFuture.completedFuture(playgroundService.compilePlaygroundCode(playgroundCode));
+        return playgroundService.compilePlaygroundCode(playgroundCode);
     }
 
 

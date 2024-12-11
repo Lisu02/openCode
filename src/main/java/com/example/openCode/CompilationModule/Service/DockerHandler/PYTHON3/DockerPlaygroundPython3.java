@@ -87,7 +87,7 @@ public class DockerPlaygroundPython3 {
             String outputMemory = getMemory(runFileCallback.getOutput());
 
             log.info("PLAYGROUND: Output time -> " + outputTime + " | Memory -> " + outputMemory);
-            return getOnlyCodeOutput(runFileCallback.getOutput());
+            return getOnlyCodeOutput(runFileCallback.getOutput()) + "\n\nOutput time -> " + outputTime +"ms" + " | Memory -> " + outputMemory +"kb";
         }
 
         return "Execution error: Python code took too long to execute";
