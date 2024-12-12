@@ -15,7 +15,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
-@CrossOrigin(origins = "*")
 public class PlaygroundController {
 
     private PlaygroundService playgroundService;
