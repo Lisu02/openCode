@@ -13,7 +13,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000", "https://open-code-front-vue-urxw.vercel.app")
+                        .allowedOrigins("*")
                         .allowedHeaders("Authorization","Content-Type")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
                         //.allowCredentials(true);
