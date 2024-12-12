@@ -67,14 +67,9 @@ public class UsersController {
 //            new HttpSessionSecurityContextRepository();
 
     @PostMapping("/login")
-    public String login(@RequestBody Users users,HttpServletRequest request,HttpServletResponse response){
-//        UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken.unauthenticated(
-//                users.getUsername(), users.getPassword());
-//        Authentication auth = authenticationManager.authenticate(token);
-//        SecurityContext context = securityContextHolderStrategy.createEmptyContext();
-
-
-        return usersService.login(users);
+    public ResponseEntity<?> login(@RequestBody Users users,HttpServletRequest request,HttpServletResponse response){
+        Map<String,String> responseMap = new HashMap<>();
+        return usersService.login(users,responseMap);
     }
 
     @GetMapping("/userInfo/{id}")

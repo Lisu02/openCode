@@ -6,6 +6,8 @@ import com.example.openCode.CompilationModule.Model.UserSolution;
 import com.example.openCode.CompilationModule.Model.Users.Users;
 import com.example.openCode.CompilationModule.Repository.UsersRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,7 +19,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.OK;
 
 @Service
 public class UsersService {
@@ -66,13 +71,14 @@ public class UsersService {
     private SecurityContextRepository securityContextRepository =
             new HttpSessionSecurityContextRepository();
 
-    public String login(Users user) {
+    public ResponseEntity<?> login(Users user, Map<String,String> responseMap) {
         Authentication auth = authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 
         if(auth.isAuthenticated()) {
-            return jwtService.generateToken(user.getUsername());
+            responseMap.put("token", jwtService.generateToken(user.getUsername()));
+            return new ResponseEntity<>(responseMap, OK);
         }
-        return "Failed";
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
     //added new prod
