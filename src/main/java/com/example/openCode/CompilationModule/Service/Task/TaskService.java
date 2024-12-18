@@ -191,4 +191,14 @@ public class TaskService {
 
         taskRepository.delete(task);
     }
+
+    public void saveTaskDescription(TaskDescription description) {
+        if(taskRepository.existsById(description.getId())){
+            Task task = taskRepository.findById(description.getId()).get();
+            task.setTaskDescription(description);
+
+            taskDescriptionRepository.save(description);
+            taskRepository.save(task);
+        }
+    }
 }

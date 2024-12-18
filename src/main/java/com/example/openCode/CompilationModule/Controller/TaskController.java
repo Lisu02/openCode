@@ -4,6 +4,7 @@ import com.example.openCode.CompilationModule.DTO.*;
 import com.example.openCode.CompilationModule.Model.Task.ReturnType;
 import com.example.openCode.CompilationModule.Model.Task.FunctionArgument;
 import com.example.openCode.CompilationModule.Model.Task.Task;
+import com.example.openCode.CompilationModule.Model.Task.TaskDescription;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
 import com.example.openCode.CompilationModule.Model.Users.UserPrincipal;
@@ -374,14 +375,6 @@ public class TaskController {
         taskService.saveTaskDTO(taskDTO);
     }
 
-    @GetMapping("/v1/task/description/{id}")
-    public void getTaskDescription(@PathVariable("id") long id){
-        Task task = taskService.getTaskById(id);
-
-        task.getTaskDescription();
-    }
-
-
     @DeleteMapping("/v1/task/{id}")
     public ResponseEntity<?> deleteTask(@PathVariable long id) {
         // Pobranie nazwy użytkownika z kontekstu bezpieczeństwa (tokenu)
@@ -411,6 +404,39 @@ public class TaskController {
         taskService.removeTask(task);
         return new ResponseEntity<>("Task deleted successfully", HttpStatus.OK);
     }
+
+    // -------------------------- TASK DESCRIPTION ---------------------------
+    @GetMapping("/v1/task/description/{id}")
+    public ResponseEntity<TaskDescriptionDTO> getTaskDescription(@PathVariable("id") long id){
+        Task task = taskService.getTaskById(id);
+
+        if(task != null){
+            TaskDescription description = task.getTaskDescription();
+            TaskDescriptionDTO descriptionDTO = TaskDescriptionDTO.builder()
+                    .taskId(task.getId())
+                    .description(description.getDescription())
+                    .build();
+            return ResponseEntity.ok(descriptionDTO);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/v1/task/description")
+    public ResponseEntity<?> postTaskDescription(@RequestBody TaskDescriptionDTO descriptionDTO){
+
+        Task task = taskService.getTaskById(descriptionDTO.getTaskId());
+        if(task != null){
+            TaskDescription description = TaskDescription.builder()
+                    .task(task)
+                    .description(descriptionDTO.getDescription())
+                    .build();
+            taskService.saveTaskDescription(description);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+
 
 
 }
