@@ -69,6 +69,17 @@ public class TaskService {
         return isTypeAnArrayType(task.getReturnType());
     }
 
+    public static boolean isTaskArgumentsAnArrayType(Task task){
+        Iterator<FunctionArgument> iterator = task.getArgumentList().iterator();
+        while(iterator.hasNext()){
+            FunctionArgument functionArgument = iterator.next();
+            if(functionArgument.getType().equals(ReturnType.INTVECTOR) || functionArgument.getType().equals(ReturnType.CHARVECTOR)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean isTypeAnArrayType(ReturnType returnType){
         return switch (returnType){
             case INTVECTOR -> true;

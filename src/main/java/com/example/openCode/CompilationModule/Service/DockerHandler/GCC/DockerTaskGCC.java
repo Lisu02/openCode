@@ -22,8 +22,7 @@ import javax.xml.transform.Source;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.example.openCode.CompilationModule.Service.Task.TaskService.isTaskArrayType;
-import static com.example.openCode.CompilationModule.Service.Task.TaskService.isTypeAnArrayType;
+import static com.example.openCode.CompilationModule.Service.Task.TaskService.*;
 
 @Component
 public class DockerTaskGCC implements DockerTaskLanguage {
@@ -328,7 +327,23 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             builder.append("\t\t\t}\n");
             builder.append("\t\tprintf(\"]) \");\n");
 
-        }else {
+        } else if (isTaskArgumentsAnArrayType(task)) {
+            builder.append("\t\tprintf(\"Test passed: %s(\",OPERATION);\n");
+            Iterator<FunctionArgument> argumentIterator = task.getArgumentList().iterator();
+            FunctionArgument functionArgumentTMP;
+            while (argumentIterator.hasNext()) {
+                functionArgumentTMP = argumentIterator.next();
+                if(isArrayType(functionArgumentTMP.getType())){
+                    builder.append("\t\tprintf(\"\");\n");
+                    builder.append("\t\t\tfor(int i = 0 ; i < " + "size"+functionArgumentTMP.getName() +" ; i++){\n"); //size + nazwa argumentu
+                    builder.append("\t\t\t\tprintf(\"%d,\","+ functionArgumentTMP.getName()+ "[i]" + ");\n");  //nazwa argumentu[i]
+                    builder.append("\t\t\t}\n");
+                }else{
+                    builder.append("\t\tprintf(\""+ printfSpecifiers(functionArgumentTMP.getType()) + "\","+functionArgumentTMP.getName()+ ");\n");
+                }
+            }
+            builder.append("\t\tprintf(\") == " + printfSpecifiers(task.getReturnType()) +"\\n\",expected);\n");
+        } else {
             Iterator<FunctionArgument> iterator = task.getArgumentList().iterator();
             FunctionArgument functionArgumentTMP;
 
@@ -354,6 +369,14 @@ public class DockerTaskGCC implements DockerTaskLanguage {
         }
     }
 
+    //TODO: REFACTOR FAST
+    private static boolean isArrayType(ReturnType type) {
+        return switch (type) {
+            case INTVECTOR, CHARVECTOR -> true;
+            default -> false;
+        };
+    }
+
     private static void generateTestResultFailed(Task task, StringBuilder builder){
         if(isTaskArrayType(task)){
             builder.append("\t\tprintf(\"\\nTest failed: %s(\",OPERATION);\n");
@@ -367,7 +390,24 @@ public class DockerTaskGCC implements DockerTaskLanguage {
             builder.append("\t\t\t\tprintf(\"%d,\",expected[i]);\n");
             builder.append("\t\t\t}\n");
             builder.append("\t\tprintf(\"]) \");\n");
-        }else {
+        }else if (isTaskArgumentsAnArrayType(task)) {
+            builder.append("\t\tprintf(\"Test failed: %s(\",OPERATION);\n");
+            Iterator<FunctionArgument> argumentIterator = task.getArgumentList().iterator();
+            FunctionArgument functionArgumentTMP;
+            while (argumentIterator.hasNext()) {
+                functionArgumentTMP = argumentIterator.next();
+                if (isArrayType(functionArgumentTMP.getType())) {
+                    builder.append("\t\tprintf(\"\");\n");
+                    builder.append("\t\t\tfor(int i = 0 ; i < " + "size" + functionArgumentTMP.getName() + " ; i++){\n"); //size + nazwa argumentu
+                    builder.append("\t\t\t\tprintf(\"%d,\"," + functionArgumentTMP.getName() + "[i]" + ");\n");  //nazwa argumentu[i]
+                    builder.append("\t\t\t}\n");
+                } else {
+                    builder.append("\t\tprintf(\"" + printfSpecifiers(functionArgumentTMP.getType()) + "\"," + functionArgumentTMP.getName() + ");\n");
+                }
+            }
+            builder.append("\t\tprintf(\") == " + printfSpecifiers(task.getReturnType()) + ", got "+ printfSpecifiers(task.getReturnType()) + " instead\\n\",expected,result);\n");
+        }
+        else {
             Iterator<FunctionArgument> iterator = task.getArgumentList().iterator();
             FunctionArgument functionArgumentTMP;
 
