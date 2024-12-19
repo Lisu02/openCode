@@ -18,6 +18,6 @@ public class PlaygroundCode {
     @Column(name = "language")
     private String programmingLanguage;
 
-    @Column(name = "code")
+    @Column(name = "code",length = 1024 *2)
     private String code;
 }

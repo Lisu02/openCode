@@ -273,7 +273,7 @@ public class DockerTaskPython3 implements DockerTaskLanguage {
             builder.append(fnArg.getName()).append(": ").append(getTypeToFunction(fnArg.getType()));
             if(fnArgIterator.hasNext()){builder.append(", ");}
         }
-        builder.append("):\n");
+        builder.append(") -> ").append(getTypeToFunction(task.getReturnType())).append(":\n");
         builder.append("\t");
         response.put("codeForUserPYTHON3",builder.toString());
     }

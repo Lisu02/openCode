@@ -435,7 +435,7 @@ public class TaskController {
         Task task = taskService.getTaskById(descriptionDTO.getTaskId());
         if(task != null){
             TaskDescription description = TaskDescription.builder()
-                    .id(0L)
+                    .id(null)
                     .task(task)
                     .description(descriptionDTO.getDescription())
                     .build();

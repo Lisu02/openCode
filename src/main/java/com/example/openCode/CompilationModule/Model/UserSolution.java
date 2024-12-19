@@ -19,7 +19,7 @@ public class UserSolution {
 
     private String programmingLanguage;
 
-    @Column(length =  1024)
+    @Column(length =  1024 * 2)
     private String solutionCode;
 
     private Long solvingTaskId;
