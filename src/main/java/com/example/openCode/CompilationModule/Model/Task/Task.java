@@ -44,7 +44,7 @@ public class Task {
     @ManyToOne
     Users user;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "taskDescription_id")
     TaskDescription taskDescription;
 

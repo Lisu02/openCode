@@ -9,6 +9,7 @@ import com.example.openCode.CompilationModule.Model.Task.TestTask.TestArgument;
 import com.example.openCode.CompilationModule.Model.Task.TestTask.TestTask;
 import com.example.openCode.CompilationModule.Model.Users.UserPrincipal;
 import com.example.openCode.CompilationModule.Model.Users.Users;
+import com.example.openCode.CompilationModule.Repository.TaskDescriptionRepository;
 import com.example.openCode.CompilationModule.Service.DockerHandler.GCC.DockerTaskGCC;
 import com.example.openCode.CompilationModule.Service.DockerHandler.PYTHON3.DockerTaskPython3;
 import com.example.openCode.CompilationModule.Service.Task.TaskService;
@@ -30,6 +31,7 @@ import java.util.List;
 @RestController()
 public class TaskController {
 
+    private final TaskDescriptionRepository taskDescriptionRepository;
     TaskService taskService;
     MyUserDetailsService myUserDetailsService;
     DockerTaskGCC dockerTaskGCC;
@@ -38,16 +40,17 @@ public class TaskController {
 
 
     @Autowired
-    public TaskController(TaskService taskService, MyUserDetailsService myUserDetailsService, DockerTaskGCC dockerTaskGCC, DockerTaskPython3 dockerTaskPython3) {
+    public TaskController(TaskService taskService, MyUserDetailsService myUserDetailsService, DockerTaskGCC dockerTaskGCC, DockerTaskPython3 dockerTaskPython3, TaskDescriptionRepository taskDescriptionRepository) {
         this.taskService = taskService;
         this.myUserDetailsService = myUserDetailsService;
         this.dockerTaskGCC = dockerTaskGCC;
         this.dockerTaskPython3 = dockerTaskPython3;
+        this.taskDescriptionRepository = taskDescriptionRepository;
     }
 
     @PostMapping("/v1/addTask")
-    public void addTask(@RequestBody TaskDTO taskDTO) {
-
+    public Long addTask(@RequestBody TaskDTO taskDTO) {
+        log.atInfo().log("Adding task:");
         // Pobranie nazwy użytkownika z kontekstu bezpieczeństwa (tokenu)
         String username = null;
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -118,9 +121,14 @@ public class TaskController {
 
         taskService.saveTask(task);
         Task tmp = taskService.getTaskById(task.getId());
+
+
+
+
         if(tmp != null){
             generateTask(tmp.getId());
         }
+        return tmp.getId();
     }
 
 
@@ -410,7 +418,7 @@ public class TaskController {
     public ResponseEntity<TaskDescriptionDTO> getTaskDescription(@PathVariable("id") long id){
         Task task = taskService.getTaskById(id);
 
-        if(task != null){
+        if(task != null){ //todo taskdescription null check
             TaskDescription description = task.getTaskDescription();
             TaskDescriptionDTO descriptionDTO = TaskDescriptionDTO.builder()
                     .taskId(task.getId())
@@ -421,12 +429,13 @@ public class TaskController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/v1/task/description")
+    @PostMapping("/v1/task/addDescription")
     public ResponseEntity<?> postTaskDescription(@RequestBody TaskDescriptionDTO descriptionDTO){
-
+    log.atWarn().log("Adding description to task:" + descriptionDTO.toString());
         Task task = taskService.getTaskById(descriptionDTO.getTaskId());
         if(task != null){
             TaskDescription description = TaskDescription.builder()
+                    .id(0L)
                     .task(task)
                     .description(descriptionDTO.getDescription())
                     .build();

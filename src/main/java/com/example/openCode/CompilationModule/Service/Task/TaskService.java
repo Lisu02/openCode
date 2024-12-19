@@ -193,11 +193,11 @@ public class TaskService {
     }
 
     public void saveTaskDescription(TaskDescription description) {
-        if(taskRepository.existsById(description.getId())){
-            Task task = taskRepository.findById(description.getId()).get();
+        if(taskRepository.existsById(description.getTask().getId())){
+            Task task = taskRepository.findById(description.getTask().getId()).get();
             task.setTaskDescription(description);
+            description.setTask(task);
 
-            taskDescriptionRepository.save(description);
             taskRepository.save(task);
         }
     }
