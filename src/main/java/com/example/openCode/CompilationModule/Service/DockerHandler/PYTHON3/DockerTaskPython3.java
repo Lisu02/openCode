@@ -258,8 +258,8 @@ public class DockerTaskPython3 implements DockerTaskLanguage {
             case BOOLEAN -> "bool";
             case CHAR -> "str";
             case STRING -> "str";
-            case INTVECTOR -> "List[int]"; //from typing import List, Union dla laczenia typow
-            case CHARVECTOR -> "List[str]";
+            case INTVECTOR -> "list[int]"; //from typing import List, Union dla laczenia typow
+            case CHARVECTOR -> "list[str]";
         };
     }
 
