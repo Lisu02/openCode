@@ -27,9 +27,6 @@ import static com.example.openCode.CompilationModule.Service.Task.TaskService.*;
 @Component
 public class DockerTaskGCC implements DockerTaskLanguage {
 
-    //This class role is to create code tasks inside a docker container that can
-    //be run to check if the solution of the user is correct
-
     private static final Logger log = LoggerFactory.getLogger(DockerTaskGCC.class);
     private DockerClient dockerClient = DockerConfiguration.getDockerClientInstance();
     private String gccContainerId = ContainerIdList.getGccContainerId();

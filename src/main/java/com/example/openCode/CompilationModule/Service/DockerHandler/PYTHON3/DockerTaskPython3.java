@@ -86,57 +86,6 @@ public class DockerTaskPython3 implements DockerTaskLanguage {
         }
     }
 
-    private void generatePythonTestScriptOLD(Task task, StringBuilder builder) {
-        builder.append("import importlib.util\n");
-        builder.append("import sys\n\n");
-
-        builder.append("OPERATION = \"").append(task.getFunctionName()).append("\"\n\n");
-
-        builder.append("def load_user_function(file_path):\n");
-        builder.append("    spec = importlib.util.spec_from_file_location(\"user_module\", file_path)\n");
-        builder.append("    user_module = importlib.util.module_from_spec(spec)\n");
-        builder.append("    spec.loader.exec_module(user_module)\n");
-        builder.append("    return getattr(user_module, \"").append(task.getFunctionName()).append("\")\n\n");
-
-        builder.append("def test(operation, liczba, mnoznik, expected, overall, failed):\n");
-        builder.append("    result = operation(liczba, mnoznik)\n");
-        builder.append("    overall += 1\n");
-        builder.append("    if result == expected:\n");
-        builder.append("        print(f\"Test passed: {OPERATION}({liczba}, {mnoznik}) == {expected}\")\n");
-        builder.append("    else:\n");
-        builder.append("        print(f\"Test failed: {OPERATION}({liczba}, {mnoznik}) == {expected}, got {result} instead\")\n");
-        builder.append("        failed += 1\n");
-        builder.append("    return overall, failed\n\n");
-
-        builder.append("def main(user_file):\n");
-        builder.append("    mnozenie = load_user_function(user_file)\n\n");
-        builder.append("    overall = 0\n");
-        builder.append("    failed = 0\n\n");
-
-        // Generate test cases based on the task object
-        builder.append("    # Run tests on the user-submitted function\n");
-
-        for (TestTask testTask : task.getTestList()) {
-            builder.append("    overall, failed = test(mnozenie, ");
-            Iterator<TestArgument> testArgumentIterator = testTask.getTestArguments().iterator();
-            while (testArgumentIterator.hasNext()) {
-                TestArgument testArgument = testArgumentIterator.next();
-                builder.append(testArgument.getArgument());
-                if (testArgumentIterator.hasNext()) builder.append(", ");
-            }
-            builder.append(", ").append(testTask.getExpectedValue()).append(", overall, failed)\n");
-        }
-
-        builder.append("\n    print(f\"overall: {overall}, failed: {failed}\")\n\n");
-
-        builder.append("if __name__ == \"__main__\":\n");
-        builder.append("    if len(sys.argv) != 2:\n");
-        builder.append("        print(\"Usage: python test_script.py <user_code_file.py>\")\n");
-        builder.append("        sys.exit(1)\n\n");
-        builder.append("    user_file = sys.argv[1]\n");
-        builder.append("    main(user_file)\n");
-    }
-
     //TODO: 2 RODZAJE ZWRACANIA BŁĘDÓW 1 TO EXIT 2 TO RAISE
     private void generatePythonTestScript(Task task,StringBuilder builder) {
         builder.append("import importlib.util\n");
