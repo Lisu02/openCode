@@ -11,7 +11,9 @@ App for compiling and running your C and Python code in a safe environment. Crea
 ## Installation
 
 _Open code_ requires Java 17, Maven and Docker running on your machine.
+
 To run the project locally you need to...
+
 *remove app service in compose.yaml (requires logging in to pull the openCode-app image)
 
 *create .env file with DB_USER, DB_PASSWORD, DB_PORT for postgres db
